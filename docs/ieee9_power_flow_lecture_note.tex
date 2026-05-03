@@ -55,17 +55,18 @@ or reactive-power requirements. AC power flow is therefore the entry point
 for contingency analysis, voltage-security assessment, optimal power flow,
 state estimation validation, and many simulation studies.
 
-It is also the feasibility check that sits underneath every
-market-clearing calculation in wholesale electricity markets. Locational
-marginal prices (LMPs) are the dual variables on the nodal energy-balance
-constraints in optimal power flow; congestion rents are the dual variables
-on the binding line constraints; the slack-bus convention plays the role
-of an angle reference. Most production-grade market software runs a
-linearized \emph{DC} power-flow approximation of the equations developed
-here, but the AC problem is the ground truth those approximations are
-calibrated against. Understanding the AC equations on a small,
-transparent case is therefore useful background for anyone working with
-electricity-market models.
+It is also the physical feasibility model behind many nodal and
+security-constrained wholesale market calculations. Locational marginal
+prices (LMPs) are the dual variables on nodal active-power balance
+constraints in optimal power flow. Multipliers on binding branch-flow
+constraints produce congestion components of LMPs and settlement
+congestion rents, but the rents are not themselves dual variables. The
+slack-bus convention fixes the angle reference. Many production-grade
+market engines use a linearized \emph{DC} power-flow approximation of
+the equations developed here, while AC power flow is the more complete
+network model those approximations are checked against. Understanding
+the AC equations on a small, transparent case is therefore useful
+background for anyone working with electricity-market models.
 
 The case used here is the WSCC 3-machine 9-bus system, often called the
 Anderson 9-bus after its appearance in Anderson and Fouad's
@@ -100,9 +101,11 @@ economic analogue is given where one is genuinely close.
   \item[Reactive power (MVAr).] A network-support quantity needed to
   sustain AC voltages in the presence of inductive and capacitive
   elements. It does not deliver useful work in the same sense as real
-  power, but transmission cannot operate without it. In markets it is
-  procured as a separate ancillary service. Treat as an
-  unpriced-or-separately-priced complement to real power.
+  power, but transmission cannot operate without it. Market treatment
+  varies by jurisdiction: reactive support may be covered by
+  interconnection requirements, cost-based compensation, tariff
+  obligations, or ancillary-service procurement rather than a nodal price
+  analogous to LMP.
   \item[Slack bus.] The bus where voltage magnitude and angle are fixed
   by convention and the generator output is whatever the rest of the
   problem implies. It is analogous to a numéraire only in the narrow
@@ -110,8 +113,9 @@ economic analogue is given where one is genuinely close.
   all other angles are then \emph{relative} to it.
   \item[PV bus.] A generator bus with specified real-power output and
   voltage magnitude (the ``P'' and the ``V''). Reactive output and angle
-  are solved. Read as ``a node that targets a price-like variable
-  (voltage), at whatever quantity-support is required.''
+  are solved. In this fixture, reactive limits are not enforced, so the
+  solved $Q_G$ is whatever the unconstrained power-flow equations require
+  to hold the voltage setpoint.
   \item[PQ bus.] A bus with specified real and reactive demand (the ``P''
   and the ``Q''). Both voltage magnitude and angle are solved. Read as
   ``a passive consumption node.''
@@ -125,10 +129,10 @@ economic analogue is given where one is genuinely close.
   $r$ produces real-power losses (the ``transaction cost''
   interpretation); reactance $x$ governs how strongly an angle
   difference pushes real power across the branch.
-  \item[Shunt charging ($b$).] A line-side capacitive element that
-  injects reactive power into the network. It is a ``free'' source of
-  reactive support, in contrast to generator-supplied reactive power
-  which has positive marginal cost.
+  \item[Shunt charging ($b$).] The total branch charging susceptance in
+  the MATPOWER branch model. The model places $jb/2$ at each end of the
+  branch; for positive capacitive charging, this contributes reactive
+  injection that depends on the local voltage magnitude.
   \item[Tap ratio, phase shift.] Transformer settings. Both equal $1$
   and $0$ respectively in this fixture, so they can be ignored here.
   \item[Generator step-up transformer (GSU).] The transformer that
@@ -199,10 +203,11 @@ different bus types:
   bus serves two structural roles. First, it provides the angle
   reference $\theta_1 = 0$, without which the system is invariant under a
   global phase shift and the equations are underdetermined --- the
-  reference-angle role. Second, it closes the real- and reactive-power
-  balances: total losses (real and reactive) depend on the solved state
-  and cannot be assigned to a generator in advance, so the residual is
-  absorbed at a single chosen bus.
+  reference-angle role. Second, its real-power output absorbs the
+  active-power residual caused by losses once the non-slack real-power
+  injections are fixed. Reactive power is handled differently: the slack
+  bus and all PV buses have solved reactive outputs, so reactive balance
+  is not assigned to a single bus.
   \item \textbf{PV bus}: specifies real-power generation $P_G$ and voltage
   magnitude $|V|$. The voltage angle $\theta$ and the reactive generation
   $Q_G$ are both solved. It is therefore wrong to read the case-side
@@ -371,10 +376,10 @@ The voltage magnitudes remain close to nominal. The highest solved
 voltage is the slack-bus voltage, $1.0400~\pu$. The lowest voltage is at
 bus 9, $0.9956~\pu$, which is also the largest load bus
 ($125~\MW$ and $50~\MVAr$). The drop is driven primarily by the local
-reactive demand: the sensitivity $\partial |V|/\partial Q$ is
-strongly negative at heavily loaded buses, and bus 9 has both the
-largest $Q_D$ and only two relatively long branches connecting it to
-the rest of the network.
+reactive demand: increasing reactive load $Q_D$ tends to lower voltage
+at heavily loaded buses, while increasing net reactive injection tends
+to raise it. Bus 9 has both the largest $Q_D$ and two relatively
+impedance-heavy branches connecting it to the rest of the network.
 
 A subtler observation is that bus 6 sits at $1.0324~\pu$, which is
 \emph{above} the $1.0250~\pu$ PV setpoint used at generator buses 2 and
@@ -415,8 +420,9 @@ interpreting branch flows --- is the most useful intuition the
 
 \begin{longtable}{@{}rrrrrrrr@{}}
 \caption{Solved branch powers. The ``from'' and ``to'' quantities follow
-the fixture branch orientation; negative values mean flow enters that end
-of the branch.}\label{tab:branch-flows}\\
+the fixture branch orientation. Positive endpoint power is injected from
+that bus terminal into the branch; negative endpoint power is delivered
+from the branch into that bus terminal.}\label{tab:branch-flows}\\
 \toprule
 From & To & $P_f$ & $Q_f$ & $P_t$ & $Q_t$ & $P_{\ell}$ & $Q_{\ell}$ \\
  & & MW & MVAr & MW & MVAr & MW & MVAr \\
@@ -454,8 +460,8 @@ This is not a coincidence and not a violation of conservation; it is the
 reactive analogue of the active-loss identity, but with a sign that can
 go either way. Several branches inject more reactive power through their
 shunt charging elements than they absorb in their series reactances, so
-the per-branch ``Q loss'' can be negative. In this case the line
-charging dominates: the network as a whole is a net reactive-power
+the per-branch reactive endpoint sum can be negative. In this case the
+line charging dominates: the network as a whole is a net reactive-power
 \emph{source}, supplying $92.160~\MVAr$ that the generators do not have
 to provide. This is one of the reasons AC power flow must model
 reactive power explicitly rather than treating it as a small correction
@@ -477,19 +483,20 @@ point, not itself a price component. Losses are a real economic cost;
 they just do not appear on the demand side of the energy-balance
 constraint.
 
-\paragraph{Reactive power is largely an unpriced ancillary service.}
+\paragraph{Reactive power is voltage support, not a second energy product.}
 The $92.160~\MVAr$ that the network supplies from line charging is, in
-effect, free reactive support: there is no marginal-cost generator
-behind it. The $22.840~\MVAr$ from generators is a separate matter ---
-it occupies generator capacity that would otherwise be available for
-real power and is typically procured through reactive-support markets
-or VAR-obligation tariffs. The sharp split between ``free reactive from
-shunt charging'' and ``costly reactive from generators'' is the
-microeconomic content of the reactive-power balance.
+effect, an uncontrolled capacitive injection in this model rather than a
+generator dispatch decision. The $22.840~\MVAr$ from generators is a
+solved operating-point quantity. In real systems generator reactive
+output can consume capability and may be compensated through tariffs,
+requirements, or ancillary-service mechanisms, but this fixture has no
+generator capability curves or reactive-power cost data. The economic
+lesson is therefore limited: reactive support is necessary and scarce in
+operations, but these numbers alone do not imply a marginal cost.
 
 \paragraph{Angle differences are the physical state behind DC flow.}
-The DC power-flow approximation, which underlies most production-grade
-market software, replaces the AC equations with a linearization in
+The DC power-flow approximation, which underlies many nodal market and
+planning models, replaces the AC equations with a linearization in
 which $P_{ij} \propto (\theta_i - \theta_j)/x_{ij}$. The angles are
 primal state variables in that model, while LMPs are the dual variables
 on the nodal balance constraints. Worked example: branch 8--2 carries
@@ -501,17 +508,16 @@ AC calculation is therefore physical first: real power is driven by
 angle differences; prices respond when those physical flows interact with
 economic costs and constraints.
 
-\paragraph{Bus 9 is electrically remote, and that has a price story.}
+\paragraph{Bus 9 is the weakest-voltage load bus.}
 Bus 9 has the lowest voltage ($0.9956~\pu$) and the most negative angle
-($-3.99^\circ$), and it is at the corner of the loop opposite both the
-slack bus and most of the generation. In the LMP picture, electrical
-remoteness can translate into price separation when it increases
-marginal losses or makes transmission constraints bind. The same
-physical factors that drive bus 9's voltage down and its angle most
-negative would matter in a market dispatch if load near bus 9 grows or
-the connecting branches become congested. ``Distance from supply'' is a
-power-flow concept first, and it becomes a price concept through the OPF
-constraints and objective.
+($-3.99^\circ$). It is a large-load corner of the loop connected through
+branches 8--9 and 9--4; it is not topologically isolated from the slack
+injection point, but its local load and branch impedances make it the
+lowest-voltage bus in this solution. In the LMP picture, those same
+physical factors can contribute to price separation when they increase
+marginal losses or make transmission constraints bind. A power-flow
+solution alone does not determine which bus has the highest LMP; that
+requires an OPF objective, generator costs, and active constraints.
 
 \section{Takeaways}
 
@@ -522,9 +528,11 @@ constraints and objective.
   transmission loop.
   \item The unknown state consists of voltage angles at non-slack buses
   and voltage magnitudes at PQ buses. Slack-bus real and reactive power
-  and PV-bus reactive power are all solved outputs, not specified inputs;
-  case-side $P_G$ at the slack and $Q_G$ at every generator should be
-  read as initial values, not setpoints.
+  and PV-bus reactive power are solved outputs, not specified inputs.
+  The slack bus absorbs the active-power residual from losses; reactive
+  balance is shared through the solved reactive outputs of the slack and
+  PV buses. Case-side $P_G$ at the slack and $Q_G$ at every generator
+  should be read as initial values, not setpoints.
   \item The solved real-power generation exceeds total real load by
   $4.641~\MW$, which is the network real-power loss at this operating
   point.
@@ -533,8 +541,9 @@ constraints and objective.
   \sin(\theta_i - \theta_j)$. Branch 8--2 reproduces its solved
   $163~\MW$ flow from this formula to three figures.
   \item Branch-flow signs must be read relative to the stored branch
-  orientation. A negative ``from'' power means the actual real-power
-  flow is opposite to the stored from-to direction.
+  orientation. A negative endpoint power means power is delivered from
+  the branch into that bus terminal rather than injected from the bus
+  into the branch.
   \item Reactive-power behavior is qualitatively different from
   real-power loss accounting because line charging can inject reactive
   power. In this case the network is a net reactive-power source of
@@ -544,7 +553,7 @@ constraints and objective.
   angle differences drive real-power exchange, real power is the
   commodity, reactive power is voltage support, losses are transaction
   costs, and the slack bus fixes the reference angle. AC power flow is
-  the feasibility layer beneath every LMP calculation.
+  the feasibility layer beneath nodal OPF and LMP calculations.
 \end{enumerate}
 
 \appendix
@@ -561,10 +570,10 @@ mismatches are
 \]
 With $n_{\mathrm{PV}}$ PV buses, the unknowns are the $n - 1$ non-slack
 voltage angles and the $n - n_{\mathrm{PV}} - 1$ PQ-bus voltage
-magnitudes, giving a square nonlinear system. Newton--Raphson linearizes
-the residual using the Jacobian
+magnitudes, giving a square nonlinear system. Let $J_{\mathrm{calc}}$ be
+the Jacobian of the calculated injections,
 \[
-  J =
+  J_{\mathrm{calc}} =
   \begin{bmatrix}
     \dfrac{\partial P}{\partial \theta} & \dfrac{\partial P}{\partial |V|} \\[6pt]
     \dfrac{\partial Q}{\partial \theta} & \dfrac{\partial Q}{\partial |V|}
@@ -572,13 +581,18 @@ the residual using the Jacobian
   \;=\;
   \begin{bmatrix} H & N \\ M & L \end{bmatrix},
 \]
-restricted to the rows and columns corresponding to the unknowns above,
-and updates
+restricted to the rows and columns corresponding to the unknowns above.
+Because the mismatch is defined as specified minus calculated injection,
+the Newton step solves
 \[
+  J_{\mathrm{calc}}
   \begin{bmatrix} \Delta\theta \\ \Delta|V| \end{bmatrix}
-  = J^{-1}
-  \begin{bmatrix} \Delta P \\ \Delta Q \end{bmatrix}.
+  =
+  \begin{bmatrix} \Delta P \\ \Delta Q \end{bmatrix},
 \]
+then adds the step to the current voltage angles and magnitudes. If one
+instead defines the residual Jacobian directly, it is
+$-J_{\mathrm{calc}}$ and the right-hand side changes sign as well.
 Iteration continues until $\max_i (|\Delta P_i|, |\Delta Q_i|)$ falls
 below a tolerance, typically $10^{-6}$ to $10^{-8}$ p.u. The MATPOWER
 fixture used here does not record the iteration count or final mismatch,

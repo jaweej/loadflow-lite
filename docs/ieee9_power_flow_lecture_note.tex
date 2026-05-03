@@ -1,0 +1,289 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[hidelinks]{hyperref}
+
+\title{Lecture Notes on the IEEE 9-Bus AC Power-Flow Problem}
+\author{Generated from the loadflow-lite MATPOWER fixtures}
+\date{\today}
+
+\newcommand{\pu}{\mathrm{p.u.}}
+\newcommand{\MW}{\mathrm{MW}}
+\newcommand{\MVAr}{\mathrm{MVAr}}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+The IEEE 9-bus system is a compact benchmark for the steady-state AC
+power-flow problem. It is small enough to inspect by hand, but it still
+contains the main modeling features that make power flow nontrivial:
+multiple generator buses, voltage magnitude control, nonlinear active-
+and reactive-power balance equations, branch losses, and reactive-power
+exchange with transmission lines. These notes formulate the problem,
+describe the specific 9-bus network used in this repository, and discuss
+the solved operating point recorded in the checked-in MATPOWER-derived
+fixtures.
+\end{abstract}
+
+\section{Context and Relevance}
+
+Power-flow analysis is the basic steady-state calculation behind many
+power-system engineering tasks. Given a network model and specified
+generation, load, and voltage-control data, the AC power-flow problem
+computes the complex voltage at each bus and the real and reactive power
+flows on each branch. The result is not a dynamic trajectory; it is a
+snapshot of an operating point under balanced, sinusoidal, three-phase
+conditions.
+
+This calculation matters because many operational and planning decisions
+depend on quantities that are not specified directly in the input data:
+voltage magnitudes at load buses, bus voltage angles, slack-bus real-power
+output, generator reactive-power output, branch flows, and system losses.
+A candidate dispatch may satisfy a real-power energy balance in aggregate
+while still producing unacceptable voltage profiles, excessive line flows,
+or reactive-power requirements. AC power flow is therefore the entry point
+for contingency analysis, voltage-security assessment, optimal power flow,
+state estimation validation, and many simulation studies.
+
+The IEEE 9-bus case is useful pedagogically because it is small but not
+degenerate. It has one slack bus, two PV generator buses, six PQ buses, and
+nine branches on a 100 MVA base. The topology contains a generator/load
+network rather than a single radial feeder, and the solution exhibits both
+real-power losses and significant reactive-power effects from line charging.
+
+\section{Mathematical Formulation}
+
+\subsection{Network Model}
+
+Let the system have $n$ buses and complex bus-voltage phasors
+\[
+  V_i = |V_i| e^{j\theta_i}, \qquad i = 1,\ldots,n.
+\]
+The nodal admittance matrix is
+\[
+  Y_{\mathrm{bus}} = G + jB,
+\]
+where $G_{ik}$ and $B_{ik}$ are the conductance and susceptance entries.
+At each bus, the net complex power injection is
+\[
+  S_i = P_i + jQ_i = V_i I_i^*.
+\]
+Using $I = Y_{\mathrm{bus}}V$, the standard polar-form AC power-flow
+equations are
+\begin{align}
+  P_i &=
+  |V_i| \sum_{k=1}^n |V_k|
+  \left[
+    G_{ik}\cos(\theta_i-\theta_k)
+    + B_{ik}\sin(\theta_i-\theta_k)
+  \right], \\
+  Q_i &=
+  |V_i| \sum_{k=1}^n |V_k|
+  \left[
+    G_{ik}\sin(\theta_i-\theta_k)
+    - B_{ik}\cos(\theta_i-\theta_k)
+  \right].
+\end{align}
+
+The specified net injections are formed from positive generation and
+positive load:
+\[
+  P_i^{\mathrm{spec}} = P_{G,i} - P_{D,i}, \qquad
+  Q_i^{\mathrm{spec}} = Q_{G,i} - Q_{D,i}.
+\]
+All real and reactive powers in these notes are reported on the 100 MVA
+base used by the fixture files unless explicitly shown in MW or MVAr.
+
+\subsection{Bus Types and Unknowns}
+
+The power-flow equations are solved with different specifications at
+different bus types:
+\begin{itemize}
+  \item \textbf{Slack bus}: specifies $|V|$ and $\theta$. Its real and
+  reactive generation are outputs of the solution. It absorbs the
+  imbalance caused by losses and numerical consistency.
+  \item \textbf{PV bus}: specifies real-power generation $P_G$ and voltage
+  magnitude $|V|$. The voltage angle $\theta$ and reactive generation
+  $Q_G$ are solved.
+  \item \textbf{PQ bus}: specifies real and reactive load, and any fixed
+  generation if present. Both $|V|$ and $\theta$ are solved.
+\end{itemize}
+
+For a Newton-Raphson solution, the nonlinear equations are written as
+mismatches. For non-slack buses,
+\[
+  \Delta P_i = P_i^{\mathrm{spec}} - P_i(V,\theta),
+\]
+and for PQ buses,
+\[
+  \Delta Q_i = Q_i^{\mathrm{spec}} - Q_i(V,\theta).
+\]
+The Jacobian maps small changes in voltage angles and PQ-bus voltage
+magnitudes to these active- and reactive-power mismatches. Iteration
+continues until the mismatches are sufficiently small.
+
+\section{The Specific IEEE 9-Bus Network}
+
+The fixture used here is \texttt{data/case9.json}, with solved values from
+\texttt{data/case9\_solution.json}. The case has three generator buses:
+bus 1 is the slack bus, while buses 2 and 3 are PV buses. Loads are located
+at buses 5, 7, and 9. The total load is
+\[
+  P_D = 315.00~\MW, \qquad Q_D = 115.00~\MVAr.
+\]
+The case-side scheduled generation sums to $320.30~\MW$ and
+$22.62~\MVAr$, but the solved generator outputs differ because the slack
+bus and PV-bus reactive outputs are determined by the AC solution.
+
+\begin{table}[htbp]
+\centering
+\caption{Bus data and solved voltages for the IEEE 9-bus case.}
+\begin{tabular}{@{}rrrrrrrrr@{}}
+\toprule
+Bus & Type & $P_D$ & $Q_D$ & $P_G^{\mathrm{case}}$ & $Q_G^{\mathrm{case}}$ &
+$|V|$ & $\theta$ & $P_G^{\mathrm{sol}}$ \\
+ & & MW & MVAr & MW & MVAr & p.u. & deg & MW \\
+\midrule
+1 & slack & 0.00 & 0.00 & 72.30 & 27.03 & 1.0400 & 0.0000 & 71.64 \\
+2 & PV & 0.00 & 0.00 & 163.00 & 6.54 & 1.0250 & 9.2800 & 163.00 \\
+3 & PV & 0.00 & 0.00 & 85.00 & -10.95 & 1.0250 & 4.6648 & 85.00 \\
+4 & PQ & 0.00 & 0.00 & 0.00 & 0.00 & 1.0258 & -2.2168 & 0.00 \\
+5 & PQ & 90.00 & 30.00 & 0.00 & 0.00 & 1.0127 & -3.6874 & 0.00 \\
+6 & PQ & 0.00 & 0.00 & 0.00 & 0.00 & 1.0324 & 1.9667 & 0.00 \\
+7 & PQ & 100.00 & 35.00 & 0.00 & 0.00 & 1.0159 & 0.7275 & 0.00 \\
+8 & PQ & 0.00 & 0.00 & 0.00 & 0.00 & 1.0258 & 3.7197 & 0.00 \\
+9 & PQ & 125.00 & 50.00 & 0.00 & 0.00 & 0.9956 & -3.9888 & 0.00 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\caption{Branch parameters for the 9-bus case. All series and charging
+parameters are in p.u. on the system base.}
+\begin{tabular}{@{}rrrrrr@{}}
+\toprule
+Branch & From & To & $r$ & $x$ & $b$ \\
+\midrule
+1 & 1 & 4 & 0.00000 & 0.05760 & 0.00000 \\
+2 & 4 & 5 & 0.01700 & 0.09200 & 0.15800 \\
+3 & 5 & 6 & 0.03900 & 0.17000 & 0.35800 \\
+4 & 3 & 6 & 0.00000 & 0.05860 & 0.00000 \\
+5 & 6 & 7 & 0.01190 & 0.10080 & 0.20900 \\
+6 & 7 & 8 & 0.00850 & 0.07200 & 0.14900 \\
+7 & 8 & 2 & 0.00000 & 0.06250 & 0.00000 \\
+8 & 8 & 9 & 0.03200 & 0.16100 & 0.30600 \\
+9 & 9 & 4 & 0.01000 & 0.08500 & 0.17600 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Topologically, buses 1, 2, and 3 connect generator sources into a meshed
+transmission network through buses 4, 8, and 6 respectively. The load buses
+5, 7, and 9 are embedded in the loop
+\[
+  4 \rightarrow 5 \rightarrow 6 \rightarrow 7 \rightarrow 8
+  \rightarrow 9 \rightarrow 4.
+\]
+This loop is important: real-power injections do not simply flow along a
+single path. They divide according to the network impedances and the bus
+voltage-angle profile.
+
+\section{Discussion of the Solved Operating Point}
+
+The solved generator outputs are
+\[
+\begin{aligned}
+  P_G^{\mathrm{sol}} &= 319.641~\MW, \\
+  Q_G^{\mathrm{sol}} &= 22.840~\MVAr.
+\end{aligned}
+\]
+Since the total real load is $315.000~\MW$, the real-power loss is
+\[
+  P_{\mathrm{loss}} = 319.641 - 315.000 = 4.641~\MW.
+\]
+The slack bus supplies $71.641~\MW$, slightly less than the case-side
+scheduled value of $72.300~\MW$, because the PV generator dispatch and the
+network losses determine the final balance. Buses 2 and 3 hold their
+scheduled real-power outputs of $163.000~\MW$ and $85.000~\MW$.
+
+The voltage magnitudes remain close to nominal. The highest solved voltage
+is the slack-bus voltage, $1.0400~\pu$, while the lowest voltage is at bus
+9, $0.9956~\pu$. The lowest-voltage bus is also the largest load bus
+($125~\MW$ and $50~\MVAr$), which is consistent with the expected voltage
+drop around the transmission loop. The voltage angles range from
+$-3.9888^\circ$ at bus 9 to $9.2800^\circ$ at bus 2. In an AC transmission
+network, active-power transfer is strongly tied to voltage-angle
+differences, so these angles are not merely reporting variables; they are
+part of the solved state that explains the branch real-power flows.
+
+\begin{longtable}{@{}rrrrrrrr@{}}
+\caption{Solved branch powers. The ``from'' and ``to'' quantities follow
+the fixture branch orientation; negative values mean flow enters that end
+of the branch.}\label{tab:branch-flows}\\
+\toprule
+From & To & $P_f$ & $Q_f$ & $P_t$ & $Q_t$ & $P_{\ell}$ & $Q_{\ell}$ \\
+ & & MW & MVAr & MW & MVAr & MW & MVAr \\
+\midrule
+\endfirsthead
+\toprule
+From & To & $P_f$ & $Q_f$ & $P_t$ & $Q_t$ & $P_{\ell}$ & $Q_{\ell}$ \\
+ & & MW & MVAr & MW & MVAr & MW & MVAr \\
+\midrule
+\endhead
+1 & 4 & 71.641 & 27.046 & -71.641 & -23.923 & 0.000 & 3.123 \\
+4 & 5 & 30.704 & 1.030 & -30.537 & -16.543 & 0.166 & -15.513 \\
+5 & 6 & -59.463 & -13.457 & 60.817 & -18.075 & 1.354 & -31.531 \\
+3 & 6 & 85.000 & -10.860 & -85.000 & 14.955 & 0.000 & 4.096 \\
+6 & 7 & 24.183 & 3.120 & -24.095 & -24.296 & 0.088 & -21.176 \\
+7 & 8 & -75.905 & -10.704 & 76.380 & -0.797 & 0.475 & -11.502 \\
+8 & 2 & -163.000 & 9.178 & 163.000 & 6.654 & 0.000 & 15.832 \\
+8 & 9 & 86.620 & -8.381 & -84.320 & -11.313 & 2.300 & -19.694 \\
+9 & 4 & -40.680 & -38.687 & 40.937 & 22.893 & 0.258 & -15.794 \\
+\bottomrule
+\end{longtable}
+
+Table~\ref{tab:branch-flows} also illustrates the importance of sign
+conventions. For example, on branch $8$--$2$, the fixture orientation is
+from bus 8 to bus 2, but $P_f=-163.000~\MW$ and $P_t=163.000~\MW$. The
+real power therefore flows from bus 2 toward bus 8, not from bus 8 toward
+bus 2. Similarly, on branch $7$--$8$, the negative $P_f$ indicates that
+real power enters the branch at bus 8 and leaves at bus 7.
+
+Summing $Q_f+Q_t$ over all branches gives approximately
+$-92.160~\MVAr$. This is not a violation of reactive-power conservation;
+it reflects the shunt charging susceptance in the line models. Several
+branches inject more reactive power through their charging elements than
+they absorb in series reactive drop, so the net branch reactive ``loss''
+can be negative. This is one of the reasons AC power flow must model
+reactive power explicitly rather than treating it as a small correction to
+a real-power-only calculation.
+
+\section{Takeaways}
+
+\begin{enumerate}
+  \item The IEEE 9-bus problem is a minimal but meaningful AC power-flow
+  benchmark: it includes slack, PV, and PQ bus behavior in a small meshed
+  network.
+  \item The unknown state consists of voltage angles at non-slack buses and
+  voltage magnitudes at PQ buses. Generator reactive powers and slack-bus
+  power are outputs, not fixed inputs.
+  \item The solved real-power generation exceeds total real load by
+  $4.641~\MW$, which is the network real-power loss at this operating
+  point.
+  \item The branch-flow signs must be interpreted relative to the branch
+  orientation. Negative ``from'' power means the actual real-power flow is
+  opposite to the stored from-to direction.
+  \item Reactive-power behavior is qualitatively different from real-power
+  loss accounting because line charging can inject reactive power.
+\end{enumerate}
+
+\end{document}

@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Power Flow Viewer</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js" defer></script>
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="case-control">
+          <label for="case-select">Case</label>
+          <select id="case-select" aria-label="IEEE case"></select>
+          <span id="solve-status" class="status-pill" aria-live="polite">Loading</span>
+        </div>
+        <button id="reset-view" class="secondary-button" type="button">Reset view</button>
+      </header>
+
+      <main class="workspace">
+        <section class="diagram-panel" aria-label="Network diagram">
+          <svg id="network" viewBox="0 0 1000 1000" role="img" aria-labelledby="network-title">
+            <title id="network-title">IEEE power-flow network diagram</title>
+          </svg>
+        </section>
+
+        <aside class="inspector" aria-label="Inspector">
+          <div id="inspector-content" class="inspector-content"></div>
+        </aside>
+      </main>
+
+      <footer class="footerbar">
+        <div class="legend" aria-label="Legend">
+          <span class="legend-item"><span class="legend-symbol slack-symbol"></span>Slack</span>
+          <span class="legend-item"><span class="legend-symbol pv-symbol">G</span>Generator/PV</span>
+          <span class="legend-item"><span class="legend-symbol pq-symbol"></span>PQ</span>
+          <span class="legend-item"><span class="legend-symbol load-symbol"></span>Load</span>
+          <span class="legend-item"><span class="legend-symbol transformer-symbol"></span>Transformer</span>
+          <span class="legend-item"><span class="legend-symbol shunt-symbol"></span>Shunt</span>
+        </div>
+
+        <div class="toggles" aria-label="Overlays">
+          <label>
+            <input id="flow-toggle" type="checkbox">
+            <span>Flow arrows</span>
+          </label>
+          <label>
+            <input id="heatmap-toggle" type="checkbox">
+            <span>Voltage heatmap</span>
+          </label>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>

@@ -29,9 +29,10 @@ contains the main modeling features that make power flow nontrivial:
 multiple generator buses, voltage magnitude control, nonlinear active-
 and reactive-power balance equations, branch losses, and reactive-power
 exchange with transmission lines. These notes formulate the problem,
-describe the specific 9-bus network used in this repository, and discuss
+describe the specific 9-bus network used in this repository, discuss
 the solved operating point recorded in the checked-in MATPOWER-derived
-fixtures.
+fixtures, and offer an economic interpretation for readers whose primary
+background is markets rather than power engineering.
 \end{abstract}
 
 \section{Context and Relevance}
@@ -54,6 +55,18 @@ or reactive-power requirements. AC power flow is therefore the entry point
 for contingency analysis, voltage-security assessment, optimal power flow,
 state estimation validation, and many simulation studies.
 
+It is also the feasibility check that sits underneath every
+market-clearing calculation in wholesale electricity markets. Locational
+marginal prices (LMPs) are the dual variables on the nodal energy-balance
+constraints in optimal power flow; congestion rents are the dual variables
+on the binding line constraints; the slack-bus convention plays the role
+of a numéraire. Most production-grade market software runs a linearized
+\emph{DC} power-flow approximation of the equations developed here, but
+the AC problem is the ground truth those approximations are calibrated
+against. Understanding the AC equations on a small, transparent case is
+therefore useful background for anyone working with electricity-market
+models.
+
 The case used here is the WSCC 3-machine 9-bus system, often called the
 Anderson 9-bus after its appearance in Anderson and Fouad's
 \emph{Power System Control and Stability}. It is useful pedagogically
@@ -63,6 +76,67 @@ reported on a 100 MVA system base. The topology is a meshed transmission
 network rather than a radial feeder, and the solution exhibits both
 real-power losses and significant reactive-power effects from line
 charging.
+
+\section{A Glossary for Readers from Economics}\label{sec:glossary}
+
+This note assumes familiarity with linear algebra and Newton's method but
+not with power engineering. The vocabulary is the main barrier. The
+following one-line glosses cover the terms that appear repeatedly. An
+economic analogue is given where one is genuinely close.
+
+\begin{description}
+  \item[Bus.] A node in the network --- physically, a substation
+  busbar. Read as ``node'' throughout.
+  \item[Branch.] An edge between two buses. May be a transmission line or
+  a transformer. Read as ``arc'' or ``link.''
+  \item[Per-unit (p.u.).] A non-dimensionalization. Every quantity is
+  divided by a reference base value, so a voltage of $1.00~\pu$ means
+  ``the nominal design voltage at this bus,'' and a power of $1.00~\pu$
+  means $100~\MW$ on the system used here (100~MVA base). Treat it
+  exactly like reporting macro variables as fractions of GDP --- the
+  base is sometimes implicit but always there.
+  \item[Real power (MW).] The energy actually delivered per unit time;
+  what consumers pay for and what generators are dispatched on.
+  \item[Reactive power (MVAr).] A network-support quantity needed to
+  sustain AC voltages in the presence of inductive and capacitive
+  elements. It does not deliver useful work in the same sense as real
+  power, but transmission cannot operate without it. In markets it is
+  procured as a separate ancillary service. Treat as an
+  unpriced-or-separately-priced complement to real power.
+  \item[Slack bus.] The bus where voltage magnitude and angle are fixed
+  by convention and the generator output is whatever the rest of the
+  problem implies. Plays exactly the role of a numéraire in general
+  equilibrium: one node's price is fixed at 1 (here, one angle is fixed
+  at 0); all other angles are then \emph{relative} to it.
+  \item[PV bus.] A generator bus with specified real-power output and
+  voltage magnitude (the ``P'' and the ``V''). Reactive output and angle
+  are solved. Read as ``a node that targets a price-like variable
+  (voltage), at whatever quantity-support is required.''
+  \item[PQ bus.] A bus with specified real and reactive demand (the ``P''
+  and the ``Q''). Both voltage magnitude and angle are solved. Read as
+  ``a passive consumption node.''
+  \item[Voltage angle ($\theta_i$).] A scalar at each node. Differences in
+  $\theta$ across a branch drive real-power flow on that branch. The
+  cleanest economic analogy is to relative prices: angle differences are
+  to AC power flow what price differences are to commodity arbitrage.
+  \item[Series reactance ($x$) and series resistance ($r$).] Per-branch
+  impedance parameters. $r$ produces real-power losses (the ``transaction
+  cost'' interpretation); $x$ governs how strongly an angle difference
+  pushes real power across the branch.
+  \item[Shunt charging ($b$).] A line-side capacitive element that
+  injects reactive power into the network. It is a ``free'' source of
+  reactive support, in contrast to generator-supplied reactive power
+  which has positive marginal cost.
+  \item[Tap ratio, phase shift.] Transformer settings. Both equal $1$
+  and $0$ respectively in this fixture, so they can be ignored here.
+  \item[Generator step-up transformer (GSU).] The transformer that
+  connects a generator to the high-voltage transmission grid. The IEEE
+  9-bus has three of them (branches 1--4, 3--6, 8--2).
+\end{description}
+
+A useful one-liner: \emph{angles are like prices, real power is the
+commodity, reactive power is the lubricant, losses are the transaction
+cost, and the slack bus is the numéraire.}
 
 \section{Mathematical Formulation}
 
@@ -76,13 +150,16 @@ The nodal admittance matrix is
 \[
   Y_{\mathrm{bus}} = G + jB,
 \]
-where $G_{ik}$ and $B_{ik}$ are the conductance and susceptance entries.
-At each bus, the net complex power injection is
+where $G_{ik}$ and $B_{ik}$ are the conductance and susceptance entries
+of the bus admittance matrix --- effectively the entries of the network's
+weighted Laplacian, with weights set by line impedances. At each bus, the
+net complex power injection is
 \[
-  S_i = P_i + jQ_i = V_i I_i^*.
+  S_i = P_i + jQ_i = V_i I_i^*,
 \]
-Using $I = Y_{\mathrm{bus}}V$, the standard polar-form AC power-flow
-equations are
+where $P_i$ is real power and $Q_i$ is reactive power. Using
+$I = Y_{\mathrm{bus}}V$, the standard polar-form AC power-flow equations
+are
 \begin{align}
   P_i &=
   |V_i| \sum_{k=1}^n |V_k|
@@ -116,11 +193,11 @@ different bus types:
   real and reactive generation are outputs of the solution. The slack
   bus serves two structural roles. First, it provides the angle
   reference $\theta_1 = 0$, without which the system is invariant under a
-  global phase shift and the equations are underdetermined. Second, it
-  closes the real- and reactive-power balances: total losses (real and
-  reactive) depend on the solved state and cannot be assigned to a
-  generator in advance, so the residual is absorbed at a single chosen
-  bus.
+  global phase shift and the equations are underdetermined --- the
+  numéraire role. Second, it closes the real- and reactive-power
+  balances: total losses (real and reactive) depend on the solved state
+  and cannot be assigned to a generator in advance, so the residual is
+  absorbed at a single chosen bus.
   \item \textbf{PV bus}: specifies real-power generation $P_G$ and voltage
   magnitude $|V|$. The voltage angle $\theta$ and the reactive generation
   $Q_G$ are both solved. It is therefore wrong to read the case-side
@@ -130,40 +207,11 @@ different bus types:
   $\theta$ are solved.
 \end{itemize}
 
-\subsection{Newton--Raphson Solution}
-
-Let $n_{\mathrm{PV}}$ be the number of PV buses. The unknowns are the
-voltage angles at all non-slack buses ($n - 1$ of them) and the voltage
-magnitudes at all PQ buses ($n - n_{\mathrm{PV}} - 1$ of them). The
-matching mismatch equations are
-\[
-  \Delta P_i = P_i^{\mathrm{spec}} - P_i(V,\theta), \quad i \notin \{\text{slack}\},
-\]
-\[
-  \Delta Q_i = Q_i^{\mathrm{spec}} - Q_i(V,\theta), \quad i \in \{\text{PQ}\},
-\]
-which gives a square nonlinear system. Newton--Raphson linearizes around
-the current iterate using the Jacobian
-\[
-  J =
-  \begin{bmatrix}
-    \dfrac{\partial P}{\partial \theta} & \dfrac{\partial P}{\partial |V|} \\[6pt]
-    \dfrac{\partial Q}{\partial \theta} & \dfrac{\partial Q}{\partial |V|}
-  \end{bmatrix}
-  \;=\;
-  \begin{bmatrix} H & N \\ M & L \end{bmatrix},
-\]
-restricted to the rows and columns corresponding to the unknowns above,
-and updates
-\[
-  \begin{bmatrix} \Delta\theta \\ \Delta|V| \end{bmatrix}
-  = J^{-1}
-  \begin{bmatrix} \Delta P \\ \Delta Q \end{bmatrix}.
-\]
-Iteration continues until $\max_i (|\Delta P_i|, |\Delta Q_i|)$ falls
-below a tolerance, typically $10^{-6}$ to $10^{-8}$ p.u. The MATPOWER
-fixture used here does not record the iteration count or final mismatch,
-so we cite only the converged state.
+The resulting nonlinear system is square: there are $n - 1$ active-power
+equations (one per non-slack bus) and $n - n_{\mathrm{PV}} - 1$
+reactive-power equations (one per PQ bus). It is solved by Newton's
+method on the mismatch residual; the standard derivation, including the
+four Jacobian sub-blocks, is sketched in Appendix~\ref{app:newton}.
 
 \section{The Specific IEEE 9-Bus Network}
 
@@ -403,6 +451,57 @@ to provide. This is one of the reasons AC power flow must model
 reactive power explicitly rather than treating it as a small correction
 to a real-power-only calculation.
 
+\subsection{Economic interpretation}
+
+For readers approaching this from electricity markets rather than power
+engineering, four observations on the same numbers are worth pulling out
+explicitly.
+
+\paragraph{Losses are a wedge embedded in prices.} The $4.641~\MW$ of
+real losses is generation that has to be procured but that no consumer
+pays for at a meter. In wholesale markets, this is socialized through
+the loss component of the locational marginal price. In nodal LMP
+decompositions, $\mathrm{LMP}_i = \lambda_{\mathrm{energy}} +
+\mathrm{loss}_i + \mathrm{congestion}_i$; the $4.641~\MW$ corresponds to
+the system-wide loss component of that decomposition. Losses are a real
+economic cost; they just don't appear on the demand side of the
+energy-balance constraint.
+
+\paragraph{Reactive power is largely an unpriced ancillary service.}
+The $92.160~\MVAr$ that the network supplies from line charging is, in
+effect, free reactive support: there is no marginal-cost generator
+behind it. The $22.840~\MVAr$ from generators is a separate matter ---
+it occupies generator capacity that would otherwise be available for
+real power and is typically procured through reactive-support markets
+or VAR-obligation tariffs. The sharp split between ``free reactive from
+shunt charging'' and ``costly reactive from generators'' is the
+microeconomic content of the reactive-power balance.
+
+\paragraph{Angle differences are shadow prices in linearized form.}
+The DC power-flow approximation, which underlies most production-grade
+market software, replaces the AC equations with a linearization in
+which $P_{ij} \propto (\theta_i - \theta_j)/x_{ij}$. In that
+linearization the angles \emph{are} the dual variables of the nodal
+balance constraints --- up to the constant of proportionality, they are
+prices. Worked example: branch 8--2 carries $163~\MW$ at an angle wedge
+of $5.56^\circ$, exactly tracking the lossless formula. In the
+DC-OPF analogue this would translate to a price wedge between buses 2
+and 8. The structural insight from the AC calculation --- that real
+power is driven by angle differences --- is the same insight that says
+LMPs in adjacent buses can differ even when no line is at its capacity
+limit, because losses depend on flow.
+
+\paragraph{Bus 9 is electrically remote, and that has a price story.}
+Bus 9 has the lowest voltage ($0.9956~\pu$) and the most negative angle
+($-3.99^\circ$), and it is at the corner of the loop opposite both the
+slack bus and most of the generation. In the LMP picture, electrical
+remoteness translates directly to price separation: the same physical
+factors that drive bus 9's voltage down and its angle most negative
+would, in a market dispatch, give it a higher LMP than the rest of the
+network whenever load near bus 9 grows or the connecting branches
+become congested. ``Distance from supply'' is a power-flow concept and
+a price concept simultaneously.
+
 \section{Takeaways}
 
 \begin{enumerate}
@@ -430,6 +529,49 @@ to a real-power-only calculation.
   power. In this case the network is a net reactive-power source of
   $92.160~\MVAr$, and an interior PQ bus (bus 6) sits above the adjacent
   PV setpoint as a result.
+  \item The vocabulary maps cleanly onto market concepts:
+  angles $\leftrightarrow$ prices, real power $\leftrightarrow$
+  commodity, reactive power $\leftrightarrow$ ancillary service,
+  losses $\leftrightarrow$ transaction cost, slack bus $\leftrightarrow$
+  num\'eraire. AC power flow is the feasibility layer beneath every LMP
+  calculation.
 \end{enumerate}
+
+\appendix
+
+\section{Newton--Raphson Solution}\label{app:newton}
+
+The non-slack bus active-power mismatches and the PQ-bus reactive-power
+mismatches are
+\[
+  \Delta P_i = P_i^{\mathrm{spec}} - P_i(V,\theta), \quad i \notin \{\text{slack}\},
+\]
+\[
+  \Delta Q_i = Q_i^{\mathrm{spec}} - Q_i(V,\theta), \quad i \in \{\text{PQ}\}.
+\]
+With $n_{\mathrm{PV}}$ PV buses, the unknowns are the $n - 1$ non-slack
+voltage angles and the $n - n_{\mathrm{PV}} - 1$ PQ-bus voltage
+magnitudes, giving a square nonlinear system. Newton--Raphson linearizes
+the residual using the Jacobian
+\[
+  J =
+  \begin{bmatrix}
+    \dfrac{\partial P}{\partial \theta} & \dfrac{\partial P}{\partial |V|} \\[6pt]
+    \dfrac{\partial Q}{\partial \theta} & \dfrac{\partial Q}{\partial |V|}
+  \end{bmatrix}
+  \;=\;
+  \begin{bmatrix} H & N \\ M & L \end{bmatrix},
+\]
+restricted to the rows and columns corresponding to the unknowns above,
+and updates
+\[
+  \begin{bmatrix} \Delta\theta \\ \Delta|V| \end{bmatrix}
+  = J^{-1}
+  \begin{bmatrix} \Delta P \\ \Delta Q \end{bmatrix}.
+\]
+Iteration continues until $\max_i (|\Delta P_i|, |\Delta Q_i|)$ falls
+below a tolerance, typically $10^{-6}$ to $10^{-8}$ p.u. The MATPOWER
+fixture used here does not record the iteration count or final mismatch,
+so we cite only the converged state.
 
 \end{document}

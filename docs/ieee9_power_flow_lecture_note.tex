@@ -11,7 +11,7 @@
 \usepackage[hidelinks]{hyperref}
 
 \title{Lecture Notes on the IEEE 9-Bus AC Power-Flow Problem}
-\author{Generated from the loadflow-lite MATPOWER fixtures}
+\author{Jacob Wellendorph Ejsing, Danish Energy Agency}
 \date{\today}
 
 \newcommand{\pu}{\mathrm{p.u.}}
@@ -68,15 +68,17 @@ network model those approximations are checked against. Understanding
 the AC equations on a small, transparent case is therefore useful
 background for anyone working with electricity-market models.
 
-The case used here is the WSCC 3-machine 9-bus system, often called the
-Anderson 9-bus after its appearance in Anderson and Fouad's
-\emph{Power System Control and Stability}. It is useful pedagogically
-because it is small but not degenerate. It has three generator buses
-(one slack, two PV), six PQ buses, and nine branches; impedances are
-reported on a 100 MVA system base. The topology is a meshed transmission
-network rather than a radial feeder, and the solution exhibits both
-real-power losses and significant reactive-power effects from line
-charging.
+The case used here is the WSCC 3-machine 9-bus system. WSCC stands for
+Western Systems Coordinating Council, the historical reliability
+coordination body for the western North American interconnected power
+system; the benchmark is often called the Anderson 9-bus after its
+appearance in Anderson and Fouad's \emph{Power System Control and
+Stability}. It is useful pedagogically because it is small but not
+degenerate. It has three generator buses (one slack, two PV), six PQ
+buses, and nine branches; impedances are reported on a 100 MVA system
+base. The topology is a meshed transmission network rather than a radial
+feeder, and the solution exhibits both real-power losses and significant
+reactive-power effects from line charging.
 
 \section{A Glossary for Readers from Economics}\label{sec:glossary}
 

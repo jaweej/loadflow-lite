@@ -43,9 +43,9 @@ The implementation must reproduce solved MATPOWER reference outputs for the IEEE
 - **Line flows (P and Q at both branch ends)**: agree to within `1e-3` p.u. (i.e. 0.1 MW at 100 MVA base), with the same branch orientation and sign convention as MATPOWER
 - **Slack bus generation**: agree to within `1e-3` p.u.
 
-Input case data must be transcribed from MATPOWER's published case files (`case9.m`, `case14.m`, `case30.m`) into your own Python or JSON format, with a citation to the MATPOWER source file and version. Do not depend on a MATPOWER parser library, and do not read `.m` case files at test time.
+Input case data must be transcribed from MATPOWER's published case files (`case9.m`, `case14.m`, `case30.m`) into your own Python or JSON format, with a citation to the MATPOWER source file and version. Use those exact cases. MATPOWER also provides `case_ieee30.m`; do not substitute it for `case30.m` unless this prompt is explicitly changed. `case30` is based on the IEEE 30-bus case but is not identical to `case_ieee30`. Do not depend on a MATPOWER parser library, and do not read `.m` case files at test time.
 
-Reference solution fixtures must be generated once by running a named MATPOWER version outside this project and committed as static JSON. Each solution fixture must include a `metadata` object recording the MATPOWER version, command/options used, base MVA, date generated, and any unit/sign conversions applied. JSON has no comments, so do not rely on comment syntax for provenance. The fixtures must not be computed during tests.
+Do not assume official static JSON solution fixtures already exist online. Reference solution fixtures must be generated once by running MATPOWER `runpf` with a named MATPOWER version outside this project and committed as static JSON. Each solution fixture must include bus voltage magnitudes and angles, generator real and reactive outputs, and branch `PF`, `QF`, `PT`, and `QT` values. Each fixture must also include a `metadata` object recording the MATPOWER version, command/options used, base MVA, date generated, and any unit/sign conversions applied. JSON has no comments, so do not rely on comment syntax for provenance. The fixtures must not be computed during tests.
 
 ## Scope — what to build
 

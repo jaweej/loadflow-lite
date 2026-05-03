@@ -66,6 +66,22 @@ Prefer a tagged MATPOWER release over an unpinned moving branch. Record the exac
 
 Each solution fixture must include bus voltage magnitudes and angles, generator real and reactive outputs, and branch `PF`, `QF`, `PT`, and `QT` values. Each fixture must also include a `metadata` object recording the MATPOWER version, Octave version, command/options used, base MVA, date generated, and any unit/sign conversions applied. JSON has no comments, so do not rely on comment syntax for provenance. The fixtures must not be computed during tests.
 
+As an additional 9-bus verification layer, MATPOWER's own test suite publishes a solved AC power-flow fixture named `soln9_pf`, used by `t_pf.m` against the `t_case9_pf` input case. If available in the pinned MATPOWER release, export `t_case9_pf` plus `soln9_pf`'s `bus_soln`, `gen_soln`, and `branch_soln` into static JSON fixtures and add a dedicated test that our solver matches them. This is supplemental only: `t_case9_pf` is not identical to `case9.m` (for example, it uses bus `30` where `case9.m` uses bus `3`), so it must not replace the exact `case9.m`, `case14.m`, and `case30.m` reference fixtures.
+
+Create a small reproducible fixture-generation script at `scripts/generate_matpower_fixtures.m`. It should set MATPOWER options explicitly:
+
+```matlab
+mpopt = mpoption( ...
+    'pf.alg', 'NR', ...
+    'pf.enforce_q_lims', 0, ...
+    'pf.tol', 1e-10, ...
+    'verbose', 0, ...
+    'out.all', 0 ...
+);
+```
+
+Use that script to generate deterministic, pretty-printed JSON so fixture diffs are reviewable. If Octave's JSON support is awkward or version-dependent, write a minimal intermediate text/CSV/MAT file from Octave and convert it to pretty JSON with Python standard library code. Do not add a new JSON/serialization dependency.
+
 ### Execution model — minimize permission interruptions
 
 Separate the work into two phases.
@@ -76,7 +92,7 @@ Separate the work into two phases.
 2. Install GNU Octave via `apt-get` if needed.
 3. Add `.external/` to `.gitignore`, create `.external/`, and download/clone a pinned MATPOWER release into `.external/matpower/`.
 4. Use the project `.venv` for Python dependencies; install only `numpy` and `pytest` there if they are missing.
-5. Verify `octave --version`, MATPOWER version/commit, and a smoke `runpf('case9')` before beginning the Python implementation.
+5. Create `scripts/generate_matpower_fixtures.m` and verify `octave --version`, MATPOWER version/commit, and a smoke `runpf('case9')` before beginning the Python implementation.
 
 Batch the expected permission requests in this phase as much as the environment allows. Network access, `sudo`, `apt-get`, package installation, and external downloads belong here, not in the implementation phase.
 
@@ -170,11 +186,12 @@ This is a sketch, not a script. Follow the spirit (smallest meaningful test firs
 8. **Full solve on 2-bus system** — converges, gives correct answer.
 9. **Full solve on IEEE 9-bus** — voltage magnitudes and angles match MATPOWER reference within tolerance.
 10. **Line flows on IEEE 9-bus** match MATPOWER reference within tolerance.
-11. **Full solve on IEEE 14-bus** — passes.
-12. **Full solve on IEEE 30-bus** — passes.
-13. **Invalid topology test**: build a disconnected case or a branch that references a nonexistent bus and assert validation raises a clear error before Newton-Raphson starts.
-14. **Non-convergence test**: force non-convergence with a valid case and an unrealistically low maximum iteration count, then assert the solver raises a clear error rather than returning garbage.
-15. **Slack bus power balance**: total generation minus total load minus losses equals zero to machine precision.
+11. **Supplemental MATPOWER 9-bus test fixture**: if available, solve `t_case9_pf` and compare against MATPOWER's published `soln9_pf` bus, generator, and branch solution matrices.
+12. **Full solve on IEEE 14-bus** — passes.
+13. **Full solve on IEEE 30-bus** — passes.
+14. **Invalid topology test**: build a disconnected case or a branch that references a nonexistent bus and assert validation raises a clear error before Newton-Raphson starts.
+15. **Non-convergence test**: force non-convergence with a valid case and an unrealistically low maximum iteration count, then assert the solver raises a clear error rather than returning garbage.
+16. **Slack bus power balance**: total generation minus total load minus losses equals zero to machine precision.
 
 Each test should have a one-line docstring explaining what physical or numerical property it pins down.
 
@@ -191,6 +208,8 @@ powerflow/
 │       ├── ybus.py      # Y-bus assembly
 │       ├── solver.py    # Newton-Raphson, Jacobian, mismatch
 │       └── flows.py     # post-solution line flows and losses
+├── scripts/
+│   └── generate_matpower_fixtures.m
 ├── tests/
 │   ├── test_ybus.py
 │   ├── test_solver.py
@@ -200,6 +219,8 @@ powerflow/
     ├── README.md        # fixture provenance and conversion notes
     ├── case9.json       # transcribed from MATPOWER case9.m
     ├── case9_solution.json   # reference voltages, angles, flows
+    ├── t_case9_pf.json       # optional MATPOWER test-suite 9-bus fixture
+    ├── soln9_pf.json         # optional MATPOWER test-suite solved fixture
     ├── case14.json
     ├── case14_solution.json
     ├── case30.json
@@ -220,6 +241,8 @@ powerflow/
 - All tests pass.
 - IEEE 9-bus, 14-bus, and 30-bus solutions match MATPOWER reference within the tolerances stated above.
 - README documents how to run the tests, what the solver does, and what its known limitations are (no Q limits, no DC PF, etc.).
+- `.external/` is ignored in `.gitignore`, and MATPOWER tooling is not committed.
+- Fixture JSON files are deterministic, pretty-printed, and generated by `scripts/generate_matpower_fixtures.m` with explicit MATPOWER options.
 - Total dependency list is exactly: numpy, pytest.
 - Code is readable enough that I can sit down and trace the Newton-Raphson update by eye.
 

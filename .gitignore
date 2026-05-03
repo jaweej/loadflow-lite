@@ -219,3 +219,6 @@ __marimo__/
 
 # Windows download metadata
 *:Zone.Identifier
+
+# External fixture-generation tooling
+.external/

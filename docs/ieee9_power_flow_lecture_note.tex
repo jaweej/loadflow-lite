@@ -60,12 +60,12 @@ market-clearing calculation in wholesale electricity markets. Locational
 marginal prices (LMPs) are the dual variables on the nodal energy-balance
 constraints in optimal power flow; congestion rents are the dual variables
 on the binding line constraints; the slack-bus convention plays the role
-of a numéraire. Most production-grade market software runs a linearized
-\emph{DC} power-flow approximation of the equations developed here, but
-the AC problem is the ground truth those approximations are calibrated
-against. Understanding the AC equations on a small, transparent case is
-therefore useful background for anyone working with electricity-market
-models.
+of an angle reference. Most production-grade market software runs a
+linearized \emph{DC} power-flow approximation of the equations developed
+here, but the AC problem is the ground truth those approximations are
+calibrated against. Understanding the AC equations on a small,
+transparent case is therefore useful background for anyone working with
+electricity-market models.
 
 The case used here is the WSCC 3-machine 9-bus system, often called the
 Anderson 9-bus after its appearance in Anderson and Fouad's
@@ -105,9 +105,9 @@ economic analogue is given where one is genuinely close.
   unpriced-or-separately-priced complement to real power.
   \item[Slack bus.] The bus where voltage magnitude and angle are fixed
   by convention and the generator output is whatever the rest of the
-  problem implies. Plays exactly the role of a numéraire in general
-  equilibrium: one node's price is fixed at 1 (here, one angle is fixed
-  at 0); all other angles are then \emph{relative} to it.
+  problem implies. It is analogous to a numéraire only in the narrow
+  sense that one reference is fixed: here one angle is fixed at zero, and
+  all other angles are then \emph{relative} to it.
   \item[PV bus.] A generator bus with specified real-power output and
   voltage magnitude (the ``P'' and the ``V''). Reactive output and angle
   are solved. Read as ``a node that targets a price-like variable
@@ -117,12 +117,14 @@ economic analogue is given where one is genuinely close.
   ``a passive consumption node.''
   \item[Voltage angle ($\theta_i$).] A scalar at each node. Differences in
   $\theta$ across a branch drive real-power flow on that branch. The
-  cleanest economic analogy is to relative prices: angle differences are
-  to AC power flow what price differences are to commodity arbitrage.
-  \item[Series reactance ($x$) and series resistance ($r$).] Per-branch
-  impedance parameters. $r$ produces real-power losses (the ``transaction
-  cost'' interpretation); $x$ governs how strongly an angle difference
-  pushes real power across the branch.
+  closest economic analogy is to a relative-gradient variable: angle
+  differences, like price differences, help determine the direction and
+  quantity of exchange, but they are physical state variables rather than
+  market prices.
+  \item[Series impedance.] The branch parameters $r$ and $x$. Resistance
+  $r$ produces real-power losses (the ``transaction cost''
+  interpretation); reactance $x$ governs how strongly an angle
+  difference pushes real power across the branch.
   \item[Shunt charging ($b$).] A line-side capacitive element that
   injects reactive power into the network. It is a ``free'' source of
   reactive support, in contrast to generator-supplied reactive power
@@ -134,9 +136,10 @@ economic analogue is given where one is genuinely close.
   9-bus has three of them (branches 1--4, 3--6, 8--2).
 \end{description}
 
-A useful one-liner: \emph{angles are like prices, real power is the
-commodity, reactive power is the lubricant, losses are the transaction
-cost, and the slack bus is the numéraire.}
+A useful one-liner, with the analogy kept deliberately loose:
+\emph{angle differences drive real-power exchange, real power is the
+commodity, reactive power is voltage support, losses are the transaction
+cost, and the slack bus supplies the reference angle.}
 
 \section{Mathematical Formulation}
 
@@ -151,9 +154,11 @@ The nodal admittance matrix is
   Y_{\mathrm{bus}} = G + jB,
 \]
 where $G_{ik}$ and $B_{ik}$ are the conductance and susceptance entries
-of the bus admittance matrix --- effectively the entries of the network's
-weighted Laplacian, with weights set by line impedances. At each bus, the
-net complex power injection is
+of the bus admittance matrix. The series-admittance part is
+Laplacian-like, with weights set by branch impedances; line charging,
+shunts, transformer taps, and phase shifts add the details that make the
+full $Y_{\mathrm{bus}}$ more than a plain graph Laplacian. At each bus,
+the net complex power injection is
 \[
   S_i = P_i + jQ_i = V_i I_i^*,
 \]
@@ -194,7 +199,7 @@ different bus types:
   bus serves two structural roles. First, it provides the angle
   reference $\theta_1 = 0$, without which the system is invariant under a
   global phase shift and the equations are underdetermined --- the
-  numéraire role. Second, it closes the real- and reactive-power
+  reference-angle role. Second, it closes the real- and reactive-power
   balances: total losses (real and reactive) depend on the solved state
   and cannot be assigned to a generator in advance, so the residual is
   absorbed at a single chosen bus.
@@ -279,22 +284,25 @@ generator power redistributes.}
 
 \begin{table}[htbp]
 \centering
-\caption{Bus data and solved voltages for the IEEE 9-bus case.}
-\begin{tabular}{@{}rrrrrrrrr@{}}
+\caption{Bus data and solved voltages and generation for the IEEE 9-bus
+case.}
+\small
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}rcrrrrrrrr@{}}
 \toprule
 Bus & Type & $P_D$ & $Q_D$ & $P_G^{\mathrm{case}}$ & $Q_G^{\mathrm{case}}$ &
-$|V|$ & $\theta$ & $P_G^{\mathrm{sol}}$ \\
- & & MW & MVAr & MW & MVAr & p.u. & deg & MW \\
+$|V|$ & $\theta$ & $P_G^{\mathrm{sol}}$ & $Q_G^{\mathrm{sol}}$ \\
+ & & MW & MVAr & MW & MVAr & p.u. & deg & MW & MVAr \\
 \midrule
-1 & slack & 0.00 & 0.00 & 72.30 & 27.03 & 1.0400 & 0.0000 & 71.64 \\
-2 & PV & 0.00 & 0.00 & 163.00 & 6.54 & 1.0250 & 9.2800 & 163.00 \\
-3 & PV & 0.00 & 0.00 & 85.00 & -10.95 & 1.0250 & 4.6648 & 85.00 \\
-4 & PQ & 0.00 & 0.00 & 0.00 & 0.00 & 1.0258 & -2.2168 & 0.00 \\
-5 & PQ & 90.00 & 30.00 & 0.00 & 0.00 & 1.0127 & -3.6874 & 0.00 \\
-6 & PQ & 0.00 & 0.00 & 0.00 & 0.00 & 1.0324 & 1.9667 & 0.00 \\
-7 & PQ & 100.00 & 35.00 & 0.00 & 0.00 & 1.0159 & 0.7275 & 0.00 \\
-8 & PQ & 0.00 & 0.00 & 0.00 & 0.00 & 1.0258 & 3.7197 & 0.00 \\
-9 & PQ & 125.00 & 50.00 & 0.00 & 0.00 & 0.9956 & -3.9888 & 0.00 \\
+1 & slack & 0.00 & 0.00 & 72.30 & 27.03 & 1.0400 & 0.0000 & 71.64 & 27.05 \\
+2 & PV & 0.00 & 0.00 & 163.00 & 6.54 & 1.0250 & 9.2800 & 163.00 & 6.65 \\
+3 & PV & 0.00 & 0.00 & 85.00 & -10.95 & 1.0250 & 4.6648 & 85.00 & -10.86 \\
+4 & PQ & 0.00 & 0.00 & 0.00 & 0.00 & 1.0258 & -2.2168 & 0.00 & 0.00 \\
+5 & PQ & 90.00 & 30.00 & 0.00 & 0.00 & 1.0127 & -3.6874 & 0.00 & 0.00 \\
+6 & PQ & 0.00 & 0.00 & 0.00 & 0.00 & 1.0324 & 1.9667 & 0.00 & 0.00 \\
+7 & PQ & 100.00 & 35.00 & 0.00 & 0.00 & 1.0159 & 0.7275 & 0.00 & 0.00 \\
+8 & PQ & 0.00 & 0.00 & 0.00 & 0.00 & 1.0258 & 3.7197 & 0.00 & 0.00 \\
+9 & PQ & 125.00 & 50.00 & 0.00 & 0.00 & 0.9956 & -3.9888 & 0.00 & 0.00 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -369,13 +377,15 @@ largest $Q_D$ and only two relatively long branches connecting it to
 the rest of the network.
 
 A subtler observation is that bus 6 sits at $1.0324~\pu$, which is
-\emph{above} the PV setpoint of $1.0250~\pu$ at the adjacent generator
-buses 2 and 3. In a radial network this would be unusual, but in a
-meshed network with significant line charging the shunt $b$ on
-branches 5--6 and 6--7 injects reactive power into bus 6 and lifts its
-voltage above the nominal generator setpoint. This is why the
-PV-setpoint values cannot be read as upper bounds on the system voltage
-profile.
+\emph{above} the $1.0250~\pu$ PV setpoint used at generator buses 2 and
+3. Bus 6 is directly adjacent to generator bus 3, and it also sits in a
+meshed region with non-negligible line charging and nearby voltage
+control. The solved branch-end quantities show mixed local reactive
+exchange at bus 6, so the safest interpretation is not that one line
+``causes'' the higher voltage by itself, but that the network solution
+allows an interior PQ-bus voltage to rise above a generator voltage
+setpoint. This is why the PV-setpoint values cannot be read as upper
+bounds on the system voltage profile.
 
 \subsection{Angles and active-power flow}
 
@@ -457,15 +467,15 @@ For readers approaching this from electricity markets rather than power
 engineering, four observations on the same numbers are worth pulling out
 explicitly.
 
-\paragraph{Losses are a wedge embedded in prices.} The $4.641~\MW$ of
-real losses is generation that has to be procured but that no consumer
-pays for at a meter. In wholesale markets, this is socialized through
-the loss component of the locational marginal price. In nodal LMP
-decompositions, $\mathrm{LMP}_i = \lambda_{\mathrm{energy}} +
-\mathrm{loss}_i + \mathrm{congestion}_i$; the $4.641~\MW$ corresponds to
-the system-wide loss component of that decomposition. Losses are a real
-economic cost; they just don't appear on the demand side of the
-energy-balance constraint.
+\paragraph{Losses create a physical wedge that can enter prices.} The
+$4.641~\MW$ of real losses is generation that has to be procured but
+that no consumer pays for at a meter. In OPF and market models that
+represent marginal losses, those losses enter the LMP decomposition as a
+loss component alongside energy and congestion components. The
+$4.641~\MW$ value here is the system-wide physical loss at this operating
+point, not itself a price component. Losses are a real economic cost;
+they just do not appear on the demand side of the energy-balance
+constraint.
 
 \paragraph{Reactive power is largely an unpriced ancillary service.}
 The $92.160~\MVAr$ that the network supplies from line charging is, in
@@ -477,30 +487,31 @@ or VAR-obligation tariffs. The sharp split between ``free reactive from
 shunt charging'' and ``costly reactive from generators'' is the
 microeconomic content of the reactive-power balance.
 
-\paragraph{Angle differences are shadow prices in linearized form.}
+\paragraph{Angle differences are the physical state behind DC flow.}
 The DC power-flow approximation, which underlies most production-grade
 market software, replaces the AC equations with a linearization in
-which $P_{ij} \propto (\theta_i - \theta_j)/x_{ij}$. In that
-linearization the angles \emph{are} the dual variables of the nodal
-balance constraints --- up to the constant of proportionality, they are
-prices. Worked example: branch 8--2 carries $163~\MW$ at an angle wedge
-of $5.56^\circ$, exactly tracking the lossless formula. In the
-DC-OPF analogue this would translate to a price wedge between buses 2
-and 8. The structural insight from the AC calculation --- that real
-power is driven by angle differences --- is the same insight that says
-LMPs in adjacent buses can differ even when no line is at its capacity
-limit, because losses depend on flow.
+which $P_{ij} \propto (\theta_i - \theta_j)/x_{ij}$. The angles are
+primal state variables in that model, while LMPs are the dual variables
+on the nodal balance constraints. Worked example: branch 8--2 carries
+$163~\MW$ at an angle wedge of $5.56^\circ$, exactly tracking the
+lossless formula. In a DC-OPF analogue, price separation would come from
+binding constraints or modeled marginal losses, not from the mere
+existence of a nonzero angle difference. The structural insight from the
+AC calculation is therefore physical first: real power is driven by
+angle differences; prices respond when those physical flows interact with
+economic costs and constraints.
 
 \paragraph{Bus 9 is electrically remote, and that has a price story.}
 Bus 9 has the lowest voltage ($0.9956~\pu$) and the most negative angle
 ($-3.99^\circ$), and it is at the corner of the loop opposite both the
 slack bus and most of the generation. In the LMP picture, electrical
-remoteness translates directly to price separation: the same physical
-factors that drive bus 9's voltage down and its angle most negative
-would, in a market dispatch, give it a higher LMP than the rest of the
-network whenever load near bus 9 grows or the connecting branches
-become congested. ``Distance from supply'' is a power-flow concept and
-a price concept simultaneously.
+remoteness can translate into price separation when it increases
+marginal losses or makes transmission constraints bind. The same
+physical factors that drive bus 9's voltage down and its angle most
+negative would matter in a market dispatch if load near bus 9 grows or
+the connecting branches become congested. ``Distance from supply'' is a
+power-flow concept first, and it becomes a price concept through the OPF
+constraints and objective.
 
 \section{Takeaways}
 
@@ -527,14 +538,13 @@ a price concept simultaneously.
   \item Reactive-power behavior is qualitatively different from
   real-power loss accounting because line charging can inject reactive
   power. In this case the network is a net reactive-power source of
-  $92.160~\MVAr$, and an interior PQ bus (bus 6) sits above the adjacent
-  PV setpoint as a result.
-  \item The vocabulary maps cleanly onto market concepts:
-  angles $\leftrightarrow$ prices, real power $\leftrightarrow$
-  commodity, reactive power $\leftrightarrow$ ancillary service,
-  losses $\leftrightarrow$ transaction cost, slack bus $\leftrightarrow$
-  num\'eraire. AC power flow is the feasibility layer beneath every LMP
-  calculation.
+  $92.160~\MVAr$, and an interior PQ bus (bus 6) sits above the generator
+  PV setpoint.
+  \item The vocabulary has useful but limited market analogies:
+  angle differences drive real-power exchange, real power is the
+  commodity, reactive power is voltage support, losses are transaction
+  costs, and the slack bus fixes the reference angle. AC power flow is
+  the feasibility layer beneath every LMP calculation.
 \end{enumerate}
 
 \appendix

@@ -1,4 +1,4 @@
-# Power Flow v0 — From-Scratch Newton-Raphson Implementation
+# Power Flow v0 — From-Scratch Python Newton-Raphson Implementation
 
 ## Objective
 
@@ -36,14 +36,16 @@ When a test fails, **read the failure message carefully before changing code**. 
 
 ### Validation — rigorous, against published references
 
-The implementation must reproduce the published power-flow solutions of the IEEE benchmark cases to high precision. Specifically:
+The implementation must reproduce solved MATPOWER reference outputs for the IEEE benchmark cases to high precision. Specifically:
 
 - **Bus voltage magnitudes**: agree to within `1e-4` p.u.
 - **Bus voltage angles**: agree to within `1e-3` degrees
-- **Line flows (P and Q at sending end)**: agree to within `1e-3` p.u. (i.e. 0.1 MW at 100 MVA base)
+- **Line flows (P and Q at both branch ends)**: agree to within `1e-3` p.u. (i.e. 0.1 MW at 100 MVA base), with the same branch orientation and sign convention as MATPOWER
 - **Slack bus generation**: agree to within `1e-3` p.u.
 
-Reference solutions must come from MATPOWER's published case files (`case9.m`, `case14.m`, `case30.m`). Parse the case data into your own Python dict format (do not depend on a MATPOWER parser library — write a small one or transcribe the data manually with a citation comment pointing to the MATPOWER source file and version). The reference solutions for comparison should be either (a) generated once by running MATPOWER/PYPOWER outside this project and committed as JSON fixtures with a comment recording how they were generated, or (b) taken from the textbook references that come with these cases. Either way, the test fixtures must be static files in the repo, not computed at test time.
+Input case data must be transcribed from MATPOWER's published case files (`case9.m`, `case14.m`, `case30.m`) into your own Python or JSON format, with a citation to the MATPOWER source file and version. Do not depend on a MATPOWER parser library, and do not read `.m` case files at test time.
+
+Reference solution fixtures must be generated once by running a named MATPOWER version outside this project and committed as static JSON. Each solution fixture must include a `metadata` object recording the MATPOWER version, command/options used, base MVA, date generated, and any unit/sign conversions applied. JSON has no comments, so do not rely on comment syntax for provenance. The fixtures must not be computed during tests.
 
 ## Scope — what to build
 
@@ -53,9 +55,9 @@ A Newton-Raphson AC power flow with:
 
 1. **Y-bus assembly** from a line/transformer list. Lines have `(from_bus, to_bus, r, x, b, tap_ratio, phase_shift)`. Phase shifters can be 0 for v0 but the data structure must accommodate them. Shunt admittances at buses are a separate input.
 2. **Bus type handling**: slack (V, θ fixed), PV (P, V fixed), PQ (P, Q fixed). Exactly one slack bus.
-3. **Power mismatch** computation: `ΔP_i = P_i,specified − P_i,calculated`, similarly for Q at PQ buses only.
-4. **Jacobian** assembled analytically from the four submatrices `∂P/∂θ`, `∂P/∂V`, `∂Q/∂θ`, `∂Q/∂V`. Do **not** use numerical differentiation. Derive the expressions and write them in code with a comment pointing to the textbook formula.
-5. **Newton-Raphson iteration**: solve `J Δx = −Δf`, update, repeat. Convergence on max mismatch < tolerance (default `1e-8` p.u.). Maximum iterations parameter (default 20). Raise a clear exception on non-convergence — do not return silently.
+3. **Power mismatch** computation: `ΔP_i = P_i,specified − P_i,calculated`, similarly for Q at PQ buses only. Use positive loads and positive generations in the input data, and compute net specified injection as `P_spec = p_gen - p_load` and `Q_spec = q_gen - q_load` where a fixed-Q injection is required.
+4. **Jacobian** assembled analytically from the four submatrices of calculated power injections: `∂P_calc/∂θ`, `∂P_calc/∂V`, `∂Q_calc/∂θ`, `∂Q_calc/∂V`. Do **not** use numerical differentiation. Derive the expressions and write them in code with a comment pointing to the textbook formula.
+5. **Newton-Raphson iteration**: with the mismatch convention above and `J` defined as derivatives of calculated injections, solve `J Δx = Δf`, then update `x = x + Δx`. If you instead define a residual as `calculated - specified`, document that convention and solve the equivalent signed system consistently. Convergence on max mismatch < tolerance (default `1e-8` p.u.). Maximum iterations parameter (default 20). Raise a clear exception on non-convergence — do not return silently.
 6. **Post-solution**: compute line flows (P, Q at both ends), line losses, total system losses, slack bus injection. Verify Kirchhoff at every bus as a sanity check inside the solver.
 
 ### Data layer
@@ -67,10 +69,10 @@ A minimal case representation:
 class Bus:
     id: int
     type: str  # "slack" | "pv" | "pq"
-    p_load: float  # p.u.
-    q_load: float
-    p_gen: float   # specified for PV/slack (slack ignored)
-    q_gen: float   # specified for PQ only
+    p_load: float  # positive demand, p.u.
+    q_load: float  # positive demand, p.u.
+    p_gen: float   # positive generation, p.u.; slack value ignored until solved
+    q_gen: float   # positive fixed-Q generation component, p.u.; PV/slack Q is solved
     v_magnitude: float  # specified for PV/slack
     v_angle: float      # specified for slack only (usually 0)
     g_shunt: float = 0.0
@@ -84,7 +86,7 @@ class Branch:
     x: float
     b: float           # total line charging
     tap_ratio: float = 1.0
-    phase_shift: float = 0.0  # radians
+    phase_shift: float = 0.0  # radians internally; MATPOWER degrees must be converted
     status: int = 1     # 1 in-service, 0 out-of-service
 
 @dataclass
@@ -93,6 +95,10 @@ class Case:
     buses: list[Bus]
     branches: list[Branch]
 ```
+
+All internal solver quantities should be in per unit except voltage angles and branch phase shifts, which may be stored in radians internally. JSON reference fixtures should report voltage angles in degrees to match MATPOWER output. When transcribing MATPOWER data, convert bus loads/generators/shunts from MW/MVAr to p.u. on `baseMVA`; branch `r`, `x`, and `b` are already p.u. on the system base; branch phase shifts are in degrees in MATPOWER and must be converted to radians internally.
+
+Slack bus active and reactive generation and PV bus reactive generation are solved outputs, not fixed mismatch inputs. PQ buses use fixed net active and reactive injections.
 
 ### Cases to support
 
@@ -110,7 +116,7 @@ The same solver must handle all three without case-specific code paths. If 9-bus
 - Reactive limits / PV-to-PQ conversion (note as a known limitation)
 - Sparse matrices (cases are too small to need them)
 - Plotting, visualization, GUI
-- Reading MATPOWER `.m` files programmatically — transcribe to JSON or Python literals
+- Parsing MATPOWER `.m` files programmatically — transcribe the three required cases to JSON or Python literals
 - Any case beyond the three IEEE cases above
 
 ## Suggested test progression (red/green order)
@@ -129,8 +135,9 @@ This is a sketch, not a script. Follow the spirit (smallest meaningful test firs
 10. **Line flows on IEEE 9-bus** match MATPOWER reference within tolerance.
 11. **Full solve on IEEE 14-bus** — passes.
 12. **Full solve on IEEE 30-bus** — passes.
-13. **Non-convergence test**: build a deliberately ill-conditioned case (e.g. a line with absurdly low impedance, or a disconnected bus) and assert the solver raises a clear error rather than returning garbage.
-14. **Slack bus power balance**: total generation minus total load minus losses equals zero to machine precision.
+13. **Invalid topology test**: build a disconnected case or a branch that references a nonexistent bus and assert validation raises a clear error before Newton-Raphson starts.
+14. **Non-convergence test**: force non-convergence with a valid case and an unrealistically low maximum iteration count, then assert the solver raises a clear error rather than returning garbage.
+15. **Slack bus power balance**: total generation minus total load minus losses equals zero to machine precision.
 
 Each test should have a one-line docstring explaining what physical or numerical property it pins down.
 
@@ -153,6 +160,7 @@ powerflow/
 │   ├── test_flows.py
 │   └── test_ieee_cases.py
 └── data/
+    ├── README.md        # fixture provenance and conversion notes
     ├── case9.json       # transcribed from MATPOWER case9.m
     ├── case9_solution.json   # reference voltages, angles, flows
     ├── case14.json

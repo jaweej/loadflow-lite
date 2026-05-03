@@ -5,6 +5,7 @@
 \usepackage{array}
 \usepackage{booktabs}
 \usepackage{longtable}
+\usepackage{tikz}
 \usepackage[T1]{fontenc}
 \usepackage{lmodern}
 \usepackage[hidelinks]{hyperref}
@@ -178,6 +179,55 @@ are MATPOWER initial values rather than scheduled targets, so it is the
 solved generator outputs that should be compared against the load. Only
 $P_G$ at the two PV buses (163.00 and 85.00~MW) is a true setpoint, and
 the solver honors both exactly.
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+  busnode/.style={circle, draw, minimum size=7mm, inner sep=0pt, font=\small, fill=white},
+  slackbus/.style={busnode, double, double distance=1pt},
+  pvbus/.style={busnode, thick},
+  loadbus/.style={busnode},
+  branch/.style={thick},
+  xfmr/.style={thick, dashed},
+  scale=1.05
+]
+
+\node[slackbus] (b1) at (5.0, 8.8) {1};
+\node[pvbus]    (b2) at (1.2, 2.2) {2};
+\node[pvbus]    (b3) at (8.8, 2.2) {3};
+\node[busnode]  (b4) at (5.0, 7.0) {4};
+\node[loadbus]  (b5) at (2.6, 5.7) {5};
+\node[busnode]  (b6) at (2.6, 3.6) {6};
+\node[loadbus]  (b7) at (5.0, 2.4) {7};
+\node[busnode]  (b8) at (7.4, 3.6) {8};
+\node[loadbus]  (b9) at (7.4, 5.7) {9};
+
+\draw[xfmr]   (b1) -- (b4);
+\draw[branch] (b4) -- (b5);
+\draw[branch] (b5) -- (b6);
+\draw[xfmr]   (b3) -- (b6);
+\draw[branch] (b6) -- (b7);
+\draw[branch] (b7) -- (b8);
+\draw[xfmr]   (b8) -- (b2);
+\draw[branch] (b8) -- (b9);
+\draw[branch] (b9) -- (b4);
+
+\node[font=\scriptsize, anchor=west] at (5.2, 8.8) {slack};
+\node[font=\scriptsize, anchor=east] at (1.0, 2.2) {PV};
+\node[font=\scriptsize, anchor=west] at (9.0, 2.2) {PV};
+\node[font=\scriptsize, anchor=east] at (2.4, 5.7) {load};
+\node[font=\scriptsize, anchor=north] at (5.0, 2.1) {load};
+\node[font=\scriptsize, anchor=west] at (7.6, 5.7) {load};
+
+\end{tikzpicture}
+\caption{Topology of the IEEE 9-bus (WSCC) system. The double-circle
+node is the slack bus; thick-circle nodes are PV generator buses;
+``load'' annotations mark the three PQ buses with non-zero demand. Dashed
+lines (1--4, 3--6, 8--2) are the generator step-up transformer branches;
+solid lines are transmission branches. The interior loop
+$4{-}5{-}6{-}7{-}8{-}9{-}4$ is the meshed sub-network through which
+generator power redistributes.}
+\end{figure}
 
 \begin{table}[htbp]
 \centering

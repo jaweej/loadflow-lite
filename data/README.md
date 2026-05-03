@@ -1,6 +1,6 @@
 # MATPOWER Fixture Provenance
 
-Static fixtures in this directory are generated from MATPOWER 8.1 using GNU Octave and:
+Static fixtures in this directory are generated from MATPOWER 8.1 using GNU Octave 8.4.0 and:
 
 ```matlab
 mpopt = mpoption( ...
@@ -12,7 +12,7 @@ mpopt = mpoption( ...
 );
 ```
 
-The source checkout should live outside the Python package at `.external/matpower/` and must not be committed. Record the exact MATPOWER commit and Octave version in each generated JSON fixture's `metadata` object.
+The source checkout lives outside the Python package at `.external/matpower/` and must not be committed. These fixtures were generated from MATPOWER commit `1a828c7af590714499284e36ee9c81273388c594` from `https://github.com/MATPOWER/matpower.git`. Each generated JSON fixture records the exact MATPOWER commit and Octave version in its `metadata` object.
 
 Expected generated files:
 

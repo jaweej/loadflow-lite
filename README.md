@@ -9,7 +9,7 @@ Minimal AC Newton-Raphson power flow solver in Python. The implementation is int
 - Newton-Raphson solves polar AC power flow with an analytic Jacobian.
 - Branch flows, losses, solved bus injections, and solved generation are computed.
 - Toy/system tests pass.
-- IEEE MATPOWER fixture tests are present but skip until `data/*_solution.json` fixtures are generated.
+- IEEE MATPOWER fixture tests validate `case9`, `case14`, `case30`, and the supplemental `soln9_pf` 9-bus fixture.
 
 ## Setup
 
@@ -41,7 +41,7 @@ octave --quiet scripts/generate_matpower_fixtures.m
 ./.venv/bin/python -m pytest
 ```
 
-Without generated MATPOWER fixtures, the IEEE tests are skipped. After fixture generation, the test suite validates case9, case14, and case30 voltages and branch flows against static MATPOWER `runpf` output.
+Without generated MATPOWER fixtures, the IEEE tests are skipped. With fixtures present, the test suite validates case9, case14, and case30 voltages, generator outputs, and branch flows against static MATPOWER `runpf` output.
 
 ## Known Limitations
 

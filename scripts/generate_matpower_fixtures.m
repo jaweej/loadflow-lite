@@ -1,53 +1,9 @@
+1;
+
 %GENERATE_MATPOWER_FIXTURES Export MATPOWER cases and solved PF fixtures.
 %
 % Run from the repository root with:
 %   octave --quiet scripts/generate_matpower_fixtures.m
-
-repo_root = fileparts(fileparts(mfilename('fullpath')));
-matpower_dir = fullfile(repo_root, '.external', 'matpower');
-data_dir = fullfile(repo_root, 'data');
-
-if exist(matpower_dir, 'dir') ~= 7
-    error('MATPOWER directory not found: %s', matpower_dir);
-end
-if exist(data_dir, 'dir') ~= 7
-    mkdir(data_dir);
-end
-
-addpath(genpath(matpower_dir));
-
-mpopt = mpoption( ...
-    'pf.alg', 'NR', ...
-    'pf.enforce_q_lims', 0, ...
-    'pf.tol', 1e-10, ...
-    'verbose', 0, ...
-    'out.all', 0 ...
-);
-
-matpower_version = mpver();
-octave_version_value = version();
-matpower_commit = git_commit(matpower_dir);
-source_url = 'https://github.com/MATPOWER/matpower.git';
-
-case_names = {'case9', 'case14', 'case30'};
-for idx = 1:length(case_names)
-    case_name = case_names{idx};
-    mpc = feval(case_name);
-    results = runpf(mpc, mpopt);
-    if ~results.success
-        error('MATPOWER runpf did not converge for %s', case_name);
-    end
-
-    case_payload = case_payload_from_mpc( ...
-        mpc, case_name, matpower_version, matpower_commit, source_url);
-    solution_payload = solution_payload_from_results( ...
-        results, case_name, matpower_version, octave_version_value, matpower_commit, source_url);
-
-    write_pretty_json(fullfile(data_dir, [case_name '.json']), case_payload);
-    write_pretty_json(fullfile(data_dir, [case_name '_solution.json']), solution_payload);
-end
-
-export_optional_soln9(repo_root, data_dir, matpower_version, octave_version_value, matpower_commit, source_url);
 
 
 function payload = case_payload_from_mpc(mpc, case_name, matpower_version, matpower_commit, source_url)
@@ -59,13 +15,14 @@ for row = 1:size(mpc.gen, 1)
     end
     bus_id = mpc.gen(row, 1);
     if isKey(gen_by_bus, bus_id)
-        pq = gen_by_bus(bus_id);
+        pqv = gen_by_bus(bus_id);
     else
-        pq = [0, 0];
+        pqv = [0, 0, mpc.gen(row, 6)];
     end
-    pq(1) = pq(1) + mpc.gen(row, 2);
-    pq(2) = pq(2) + mpc.gen(row, 3);
-    gen_by_bus(bus_id) = pq;
+    pqv(1) = pqv(1) + mpc.gen(row, 2);
+    pqv(2) = pqv(2) + mpc.gen(row, 3);
+    pqv(3) = mpc.gen(row, 6);
+    gen_by_bus(bus_id) = pqv;
 end
 
 buses = {};
@@ -83,9 +40,14 @@ for row = 1:size(mpc.bus, 1)
     end
 
     if isKey(gen_by_bus, bus_id)
-        pq = gen_by_bus(bus_id);
+        pqv = gen_by_bus(bus_id);
     else
-        pq = [0, 0];
+        pqv = [0, 0, mpc.bus(row, 8)];
+    end
+    if strcmp(bus_type, 'slack') || strcmp(bus_type, 'pv')
+        v_magnitude = pqv(3);
+    else
+        v_magnitude = mpc.bus(row, 8);
     end
 
     buses{end + 1} = struct( ...
@@ -93,9 +55,9 @@ for row = 1:size(mpc.bus, 1)
         'type', bus_type, ...
         'p_load', mpc.bus(row, 3) / base_mva, ...
         'q_load', mpc.bus(row, 4) / base_mva, ...
-        'p_gen', pq(1) / base_mva, ...
-        'q_gen', pq(2) / base_mva, ...
-        'v_magnitude', mpc.bus(row, 8), ...
+        'p_gen', pqv(1) / base_mva, ...
+        'q_gen', pqv(2) / base_mva, ...
+        'v_magnitude', v_magnitude, ...
         'v_angle', deg2rad(mpc.bus(row, 9)), ...
         'g_shunt', mpc.bus(row, 5) / base_mva, ...
         'b_shunt', mpc.bus(row, 6) / base_mva ...
@@ -188,7 +150,8 @@ if exist(t_case, 'file') ~= 2 || exist(soln, 'file') ~= 2
     return;
 end
 
-mpc = t_case9_pf();
+[baseMVA, bus, gen, branch] = t_case9_pf();
+mpc = struct('baseMVA', baseMVA, 'bus', bus, 'gen', gen, 'branch', branch);
 case_payload = case_payload_from_mpc(mpc, 't_case9_pf', matpower_version, matpower_commit, source_url);
 write_pretty_json(fullfile(data_dir, 't_case9_pf.json'), case_payload);
 
@@ -196,6 +159,8 @@ loaded = load(soln);
 solution_payload = solution_payload_from_matrices( ...
     mpc.baseMVA, loaded.bus_soln, loaded.gen_soln, loaded.branch_soln, ...
     'soln9_pf', matpower_version, octave_version_value, matpower_commit, source_url);
+solution_payload.metadata.command = 'load(''lib/t/soln9_pf.mat'')';
+solution_payload.metadata.unit_conversions = 'Published MATPOWER test-suite solution converted from MW/MVAr to p.u. on baseMVA; voltage angles kept in degrees.';
 write_pretty_json(fullfile(data_dir, 'soln9_pf.json'), solution_payload);
 end
 
@@ -247,3 +212,50 @@ else
     fclose(fid);
 end
 end
+
+
+repo_root = fileparts(fileparts(mfilename('fullpath')));
+matpower_dir = fullfile(repo_root, '.external', 'matpower');
+data_dir = fullfile(repo_root, 'data');
+
+if exist(matpower_dir, 'dir') ~= 7
+    error('MATPOWER directory not found: %s', matpower_dir);
+end
+if exist(data_dir, 'dir') ~= 7
+    mkdir(data_dir);
+end
+
+addpath(genpath(matpower_dir));
+
+mpopt = mpoption( ...
+    'pf.alg', 'NR', ...
+    'pf.enforce_q_lims', 0, ...
+    'pf.tol', 1e-10, ...
+    'verbose', 0, ...
+    'out.all', 0 ...
+);
+
+matpower_version = mpver();
+octave_version_value = version();
+matpower_commit = git_commit(matpower_dir);
+source_url = 'https://github.com/MATPOWER/matpower.git';
+
+case_names = {'case9', 'case14', 'case30'};
+for idx = 1:length(case_names)
+    case_name = case_names{idx};
+    mpc = feval(case_name);
+    results = runpf(mpc, mpopt);
+    if ~results.success
+        error('MATPOWER runpf did not converge for %s', case_name);
+    end
+
+    case_payload = case_payload_from_mpc( ...
+        mpc, case_name, matpower_version, matpower_commit, source_url);
+    solution_payload = solution_payload_from_results( ...
+        results, case_name, matpower_version, octave_version_value, matpower_commit, source_url);
+
+    write_pretty_json(fullfile(data_dir, [case_name '.json']), case_payload);
+    write_pretty_json(fullfile(data_dir, [case_name '_solution.json']), solution_payload);
+end
+
+export_optional_soln9(repo_root, data_dir, matpower_version, octave_version_value, matpower_commit, source_url);

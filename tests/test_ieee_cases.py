@@ -56,6 +56,27 @@ def test_ieee_case_branch_flows_match_matpower_fixture(case_name):
         np.testing.assert_allclose(actual.q_to, wanted["q_to"], atol=1e-3)
 
 
+@pytest.mark.parametrize("case_name", ["case9", "case14", "case30"])
+def test_ieee_case_generation_matches_matpower_fixture(case_name):
+    """IEEE benchmark solved generator outputs match static MATPOWER fixtures."""
+    case_path, solution_path = require_fixtures(case_name)
+    case = load_case(case_path)
+    solution = load_json(solution_path)
+
+    result = solve_power_flow(case)
+
+    for generator in solution["generators"]:
+        bus_idx = next(
+            idx for idx, bus in enumerate(case.buses) if bus.id == generator["bus_id"]
+        )
+        np.testing.assert_allclose(
+            result.p_generation[bus_idx], generator["p_generation"], atol=1e-3
+        )
+        np.testing.assert_allclose(
+            result.q_generation[bus_idx], generator["q_generation"], atol=1e-3
+        )
+
+
 def test_optional_matpower_soln9_fixture_matches_when_available():
     """MATPOWER test-suite soln9_pf provides a supplemental 9-bus check."""
     case_path = DATA_DIR / "t_case9_pf.json"
@@ -63,10 +84,30 @@ def test_optional_matpower_soln9_fixture_matches_when_available():
     if not case_path.exists() or not solution_path.exists():
         pytest.skip("MATPOWER soln9_pf fixture has not been generated")
 
-    result = solve_power_flow(load_case(case_path))
+    case = load_case(case_path)
+    result = solve_power_flow(case)
     solution = load_json(solution_path)
 
     expected_vm = np.array([bus["v_magnitude"] for bus in solution["buses"]])
     expected_va = np.deg2rad([bus["v_angle_degrees"] for bus in solution["buses"]])
     np.testing.assert_allclose(result.v_magnitude, expected_vm, atol=1e-4)
     np.testing.assert_allclose(result.v_angle, expected_va, atol=np.deg2rad(1e-3))
+
+    for generator in solution["generators"]:
+        bus_idx = next(
+            idx for idx, bus in enumerate(case.buses) if bus.id == generator["bus_id"]
+        )
+        np.testing.assert_allclose(
+            result.p_generation[bus_idx], generator["p_generation"], atol=1e-3
+        )
+        np.testing.assert_allclose(
+            result.q_generation[bus_idx], generator["q_generation"], atol=1e-3
+        )
+
+    for actual, wanted in zip(result.branch_flows, solution["branches"]):
+        assert actual.from_bus == wanted["from_bus"]
+        assert actual.to_bus == wanted["to_bus"]
+        np.testing.assert_allclose(actual.p_from, wanted["p_from"], atol=1e-3)
+        np.testing.assert_allclose(actual.q_from, wanted["q_from"], atol=1e-3)
+        np.testing.assert_allclose(actual.p_to, wanted["p_to"], atol=1e-3)
+        np.testing.assert_allclose(actual.q_to, wanted["q_to"], atol=1e-3)

@@ -1,0 +1,151 @@
+{
+  "metadata": {
+    "source_case": "case9",
+    "matpower_version": "8.1",
+    "matpower_commit": "1a828c7af590714499284e36ee9c81273388c594",
+    "source_url": "https://github.com/MATPOWER/matpower.git",
+    "generated_by": "scripts/generate_matpower_fixtures.m",
+    "octave_version": "8.4.0",
+    "command": "runpf('case9', mpopt)",
+    "base_mva": 100,
+    "unit_conversions": "MW/MVAr converted to p.u. on baseMVA; voltage angles kept in degrees in solution fixtures."
+  },
+  "buses": [
+    {
+      "id": 1,
+      "v_magnitude": 1.04,
+      "v_angle_degrees": 0
+    },
+    {
+      "id": 2,
+      "v_magnitude": 1.025,
+      "v_angle_degrees": 9.280005481642794
+    },
+    {
+      "id": 3,
+      "v_magnitude": 1.0250000000000001,
+      "v_angle_degrees": 4.66475133313676
+    },
+    {
+      "id": 4,
+      "v_magnitude": 1.0257883928440104,
+      "v_angle_degrees": -2.216787799949791
+    },
+    {
+      "id": 5,
+      "v_magnitude": 1.0126543240177757,
+      "v_angle_degrees": -3.6873961701570637
+    },
+    {
+      "id": 6,
+      "v_magnitude": 1.0323529490023682,
+      "v_angle_degrees": 1.966716074449074
+    },
+    {
+      "id": 7,
+      "v_magnitude": 1.0158825836274992,
+      "v_angle_degrees": 0.7275360768742883
+    },
+    {
+      "id": 8,
+      "v_magnitude": 1.025769372386454,
+      "v_angle_degrees": 3.7197011546217587
+    },
+    {
+      "id": 9,
+      "v_magnitude": 0.9956308580482945,
+      "v_angle_degrees": -3.9888052728514682
+    }
+  ],
+  "generators": [
+    {
+      "bus_id": 1,
+      "p_generation": 0.716410214744824,
+      "q_generation": 0.2704592353349233
+    },
+    {
+      "bus_id": 2,
+      "p_generation": 1.63,
+      "q_generation": 0.06653660318427648
+    },
+    {
+      "bus_id": 3,
+      "p_generation": 0.85,
+      "q_generation": -0.10859709070988516
+    }
+  ],
+  "branches": [
+    {
+      "from_bus": 1,
+      "to_bus": 4,
+      "p_from": 0.716410214744824,
+      "q_from": 0.2704592353349233,
+      "p_to": -0.716410214744824,
+      "q_to": -0.23923126998629557
+    },
+    {
+      "from_bus": 4,
+      "to_bus": 5,
+      "p_from": 0.3070366976230788,
+      "q_from": 0.01030006373883782,
+      "p_to": -0.3053726287414005,
+      "q_to": -0.16543365243760186
+    },
+    {
+      "from_bus": 5,
+      "to_bus": 6,
+      "p_from": -0.5946273712586018,
+      "q_from": -0.1345663475623963,
+      "p_to": 0.6081658597710942,
+      "q_to": -0.18074835718895643
+    },
+    {
+      "from_bus": 3,
+      "to_bus": 6,
+      "p_from": 0.8499999999999994,
+      "q_from": -0.10859709070988516,
+      "p_to": -0.8499999999999993,
+      "q_to": 0.14955327300831142
+    },
+    {
+      "from_bus": 6,
+      "to_bus": 7,
+      "p_from": 0.24183414022891142,
+      "q_from": 0.03119508418063606,
+      "p_to": -0.24095417457392532,
+      "q_to": -0.24295822611684526
+    },
+    {
+      "from_bus": 7,
+      "to_bus": 8,
+      "p_from": -0.7590458254260813,
+      "q_from": -0.10704177388314334,
+      "p_to": 0.7637986616683602,
+      "q_to": -0.007973314422495749
+    },
+    {
+      "from_bus": 8,
+      "to_bus": 2,
+      "p_from": -1.6299999999999986,
+      "q_from": 0.09178148840188043,
+      "p_to": 1.6299999999999983,
+      "q_to": 0.06653660318427648
+    },
+    {
+      "from_bus": 8,
+      "to_bus": 9,
+      "p_from": 0.8662013383316562,
+      "q_from": -0.08380817397938166,
+      "p_to": -0.8432016251844969,
+      "q_to": -0.11312751170505736
+    },
+    {
+      "from_bus": 9,
+      "to_bus": 4,
+      "p_from": -0.40679837481550574,
+      "q_from": -0.38687248829492943,
+      "p_to": 0.40937351712173947,
+      "q_to": 0.22893120624746707
+    }
+  ]
+}

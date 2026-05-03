@@ -1,0 +1,722 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[hidelinks]{hyperref}
+
+\title{Power Flow Solver Study Plan}
+\author{Load Flow Lite}
+\date{\today}
+
+\newcommand{\code}[1]{\texttt{#1}}
+\newcommand{\pu}{\mathrm{p.u.}}
+
+\emergencystretch=2em
+\sloppy
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\newpage
+
+\section{Purpose}
+
+This is a guided plan for understanding how this repository actually solves the
+AC power flow problem. Treat it as a lab, not a checklist: read a small amount
+of code, predict what it should do, run a focused test, then explain the result
+back in your own words.
+
+The shortest path through the solver is:
+
+\begin{enumerate}
+  \item Build the network admittance matrix, \code{Ybus}.
+  \item Convert a voltage guess into calculated bus injections.
+  \item Compare calculated injections with specified injections.
+  \item Assemble the Newton--Raphson Jacobian.
+  \item Solve a linear correction system.
+  \item Update voltage angles and magnitudes.
+  \item Repeat until mismatch is below tolerance.
+  \item Compute branch flows from the solved voltages.
+\end{enumerate}
+
+\section{Learning Outcomes}
+
+By the end, you should be able to:
+
+\begin{itemize}
+  \item Explain which variables are solved for at slack, PV, and PQ buses.
+  \item Trace how a \code{Case} becomes a \code{Ybus} matrix.
+  \item Derive $S = V \cdot \operatorname{conj}(Y_{\mathrm{bus}} V)$ from
+  voltage and current.
+  \item Build the mismatch vector in the same order as the code.
+  \item Map every block of the Jacobian to its rows, columns, and bus types.
+  \item Hand-compute one Newton step for a two-bus slack/PQ system.
+  \item Explain how solved bus voltages become branch powers and losses.
+  \item Identify which files are core numerical code and which are wrappers.
+\end{itemize}
+
+\section{How to Use This Plan}
+
+Make two passes.
+
+Pass 1 is top-down. Start with \code{solve\_power\_flow} so you know the whole
+control flow before studying formulas.
+
+Pass 2 is bottom-up. Study \code{build\_ybus}, \code{power\_injections},
+\code{\_mismatch}, and \code{\_jacobian} in detail, then return to
+\code{solve\_power\_flow}.
+
+For each session:
+
+\begin{enumerate}
+  \item Read the listed functions.
+  \item Answer the checkpoint questions without looking ahead.
+  \item Run the focused test command.
+  \item Write down one sentence explaining what the code is doing
+  mathematically.
+\end{enumerate}
+
+The commands below assume the project virtual environment from the README:
+
+\begin{verbatim}
+python3 -m venv .venv
+./.venv/bin/pip install numpy pytest
+\end{verbatim}
+
+\section{Function Map}
+
+Use this as the map from concepts to code.
+
+\renewcommand{\arraystretch}{1.18}
+\begin{longtable}{p{0.19\textwidth}p{0.30\textwidth}p{0.41\textwidth}}
+\toprule
+Concept & Main code & Why it matters \\
+\midrule
+\endhead
+Case validation &
+\href{../src/powerflow/case.py\#L63}{\code{validate\_case}} &
+Rejects invalid topology before Newton starts. \\
+Bus indexing &
+\href{../src/powerflow/case.py\#L58}{\code{bus\_index}} &
+Converts external bus IDs to array indices. \\
+Network model &
+\href{../src/powerflow/ybus.py\#L10}{\code{build\_ybus}} &
+Builds the admittance matrix used in every injection calculation. \\
+Complex voltages &
+\href{../src/powerflow/flows.py\#L35}{\code{complex\_voltages}} &
+Converts magnitudes and angles into complex phasors. \\
+Calculated injections &
+\href{../src/powerflow/solver.py\#L36}{\code{power\_injections}} &
+Computes \code{P\_calc} and \code{Q\_calc} from the current voltage guess. \\
+Specified injections &
+\href{../src/powerflow/solver.py\#L30}{\code{specified\_injections}} &
+Applies the repo sign convention: generation minus load. \\
+Bus type handling &
+\href{../src/powerflow/solver.py\#L46}{\code{\_bus\_type\_indices}} &
+Determines which equations and unknowns exist. \\
+Initial guess &
+\href{../src/powerflow/solver.py\#L53}{\code{\_initial\_voltage}} &
+Creates the first Newton state. \\
+Mismatch vector &
+\href{../src/powerflow/solver.py\#L62}{\code{\_mismatch}} &
+Defines the residual that Newton drives to zero. \\
+Jacobian &
+\href{../src/powerflow/solver.py\#L77}{\code{\_jacobian}} &
+Linearizes the AC power-flow equations. \\
+Newton loop &
+\href{../src/powerflow/solver.py\#L139}{\code{solve\_power\_flow}} &
+Orchestrates the full nonlinear solve. \\
+Result assembly &
+\href{../src/powerflow/solver.py\#L195}{\code{\_build\_result}} &
+Converts the converged state into useful outputs. \\
+Branch flows &
+\href{../src/powerflow/flows.py\#L39}{\code{compute\_branch\_flows}} &
+Computes line powers and losses after convergence. \\
+\bottomrule
+\end{longtable}
+
+\section{Glossary}
+
+\begin{description}
+  \item[\code{Ybus}.] The bus admittance matrix. It maps complex bus voltages
+  to complex injected currents: \code{I = Ybus @ V}.
+  \item[\code{V}.] Complex bus voltage phasor. In code it is built from
+  \code{v\_magnitude} and \code{v\_angle}.
+  \item[\code{theta}.] Voltage angle in radians.
+  \item[\code{P}, \code{Q}.] Real and reactive power injection. Positive means
+  net injection into the network; negative means net load.
+  \item[\code{S}.] Complex power, $S = P + jQ$.
+  \item[\code{G}, \code{B}.] Real and imaginary parts of \code{Ybus}, so
+  $Y_{\mathrm{bus}} = G + jB$.
+  \item[Slack bus.] Fixed voltage magnitude and fixed angle. Its real and
+  reactive generation are solved outputs.
+  \item[PV bus.] Fixed real-power injection and voltage magnitude. Its angle is
+  solved, and its reactive generation is a solved output.
+  \item[PQ bus.] Fixed real and reactive injection. Its voltage angle and
+  magnitude are solved.
+  \item[Mismatch.] Specified injection minus calculated injection.
+  \item[Jacobian.] The matrix of partial derivatives used to turn a nonlinear
+  mismatch into a linear correction step.
+  \item[Per unit.] Normalized power-system units. The repo stores powers in
+  p.u.; conversion to MW/MVAr uses \code{base\_mva}.
+\end{description}
+
+\section{Session 1: Get the Whole Solver in Your Head}
+
+Read:
+
+\begin{itemize}
+  \item \href{../src/powerflow/solver.py\#L139}{\code{solve\_power\_flow}}
+  \item \href{../src/powerflow/solver.py\#L195}{\code{\_build\_result}}
+\end{itemize}
+
+Focus on the loop shape:
+
+\begin{verbatim}
+build Ybus
+choose unknowns
+initialize voltage state
+repeat:
+    compute mismatch
+    stop if mismatch is small
+    build Jacobian
+    solve J * step = mismatch
+    update angles and magnitudes
+\end{verbatim}
+
+Checkpoint questions:
+
+\begin{itemize}
+  \item Where is \code{Ybus} built?
+  \item Where does the code stop on convergence?
+  \item What arrays are updated during each Newton step?
+  \item Why does non-convergence raise instead of returning a partial result?
+\end{itemize}
+
+Run:
+
+\begin{verbatim}
+./.venv/bin/python -m pytest \
+  tests/test_solver.py::test_two_bus_power_flow_converges_and_balances_power -q
+\end{verbatim}
+
+Done criteria:
+
+\begin{itemize}
+  \item You can describe \code{solve\_power\_flow} without mentioning any
+  wrapper code.
+  \item You can point to the exact lines that call \code{\_mismatch},
+  \code{\_jacobian}, and \code{np.linalg.solve}.
+\end{itemize}
+
+\section{Session 2: Understand Bus Types and the State Vector}
+
+Read:
+
+\begin{itemize}
+  \item \href{../src/powerflow/solver.py\#L46}{\code{\_bus\_type\_indices}}
+  \item \href{../src/powerflow/solver.py\#L53}{\code{\_initial\_voltage}}
+  \item \href{../src/powerflow/case.py\#L63}{\code{validate\_case}}
+\end{itemize}
+
+The Newton state is not all bus voltages. It is:
+
+\begin{itemize}
+  \item Voltage angles for PV and PQ buses.
+  \item Voltage magnitudes for PQ buses only.
+\end{itemize}
+
+The slack bus angle and magnitude stay fixed. PV bus voltage magnitudes also
+stay fixed, while their reactive generation is solved after convergence.
+
+Checkpoint questions:
+
+\begin{itemize}
+  \item What would go wrong if the slack angle were included as an unknown?
+  \item Why does a PV bus solve for angle but not voltage magnitude?
+  \item Why does a PQ bus solve for both angle and magnitude?
+  \item For a system with 1 slack, 2 PV buses, and 6 PQ buses, how many Newton
+  unknowns are there?
+\end{itemize}
+
+Run:
+
+\begin{verbatim}
+./.venv/bin/python -m pytest \
+  tests/test_solver.py::test_pv_bus_keeps_voltage_magnitude_fixed -q
+\end{verbatim}
+
+Done criteria:
+
+\begin{itemize}
+  \item You can construct the state vector for any mix of slack, PV, and PQ
+  buses.
+  \item You can explain why PV-bus \code{q\_gen} is not a fixed input to the
+  mismatch.
+\end{itemize}
+
+\section{Session 3: Build \code{Ybus}}
+
+Read:
+
+\begin{itemize}
+  \item \href{../src/powerflow/ybus.py\#L10}{\code{build\_ybus}}
+  \item \href{../src/powerflow/flows.py\#L23}{\code{\_branch\_admittance\_terms}}
+\end{itemize}
+
+\code{Ybus} is the electrical network model. Each branch contributes
+self-admittance terms to the diagonal and mutual admittance terms to the
+off-diagonal entries. Line charging, transformer tap ratios, phase shifts, and
+bus shunts all enter here.
+
+Checkpoint questions:
+
+\begin{itemize}
+  \item Why does a simple series line add \code{+y} to both diagonals and
+  \code{-y} to both off-diagonals?
+  \item Why is line charging split between the two ends?
+  \item What changes when \code{tap\_ratio != 1.0}?
+  \item Why can a phase shifter make \code{Ybus[from, to]} differ from
+  \code{Ybus[to, from]}?
+\end{itemize}
+
+Run:
+
+\begin{verbatim}
+./.venv/bin/python -m pytest tests/test_ybus.py -q
+\end{verbatim}
+
+Done criteria:
+
+\begin{itemize}
+  \item You can manually stamp a two-bus branch into a 2x2 \code{Ybus}.
+  \item You can explain why \code{build\_ybus} and
+  \code{\_branch\_admittance\_terms} must use the same branch model.
+\end{itemize}
+
+\section{Session 4: Convert Voltages Into Power Injections}
+
+Read:
+
+\begin{itemize}
+  \item \href{../src/powerflow/flows.py\#L35}{\code{complex\_voltages}}
+  \item \href{../src/powerflow/solver.py\#L36}{\code{power\_injections}}
+\end{itemize}
+
+The key formula is:
+
+\begin{align*}
+I &= Y_{\mathrm{bus}} V, \\
+S &= V \cdot \operatorname{conj}(I), \\
+P_{\mathrm{calc}} &= \operatorname{real}(S), \\
+Q_{\mathrm{calc}} &= \operatorname{imag}(S).
+\end{align*}
+
+This is where the current voltage guess becomes calculated real and reactive
+power injection at each bus.
+
+Checkpoint questions:
+
+\begin{itemize}
+  \item What are the shapes of \code{V}, \code{Ybus @ V}, and \code{S}?
+  \item Why is the current conjugated in the complex-power formula?
+  \item What does a negative \code{P\_calc} mean?
+  \item What does a negative \code{Q\_calc} mean?
+\end{itemize}
+
+Run:
+
+\begin{verbatim}
+./.venv/bin/python -m pytest \
+  tests/test_solver.py -k power_injection -q
+\end{verbatim}
+
+Done criteria:
+
+\begin{itemize}
+  \item You can compute \code{S = V * conj(Ybus @ V)} for a two-bus example.
+  \item You can explain why this function knows nothing about slack, PV, or PQ
+  bus types.
+\end{itemize}
+
+\section{Session 5: Build the Mismatch Vector}
+
+Read:
+
+\begin{itemize}
+  \item \href{../src/powerflow/solver.py\#L30}{\code{specified\_injections}}
+  \item \href{../src/powerflow/solver.py\#L62}{\code{\_mismatch}}
+\end{itemize}
+
+The sign convention is:
+
+\begin{verbatim}
+P_spec = p_gen - p_load
+Q_spec = q_gen - q_load
+mismatch = specified - calculated
+\end{verbatim}
+
+The mismatch vector is ordered as:
+
+\begin{enumerate}
+  \item Real-power mismatches for PV and PQ buses.
+  \item Reactive-power mismatches for PQ buses.
+\end{enumerate}
+
+Checkpoint questions:
+
+\begin{itemize}
+  \item Why is there no real-power mismatch equation for the slack bus?
+  \item Why is there no reactive-power mismatch equation for PV buses?
+  \item How does the mismatch ordering match the Newton update vector?
+  \item What would change if mismatch were defined as calculated minus
+  specified?
+\end{itemize}
+
+Run:
+
+\begin{verbatim}
+./.venv/bin/python -m pytest \
+  tests/test_solver.py::test_two_bus_power_flow_converges_and_balances_power -q
+\end{verbatim}
+
+Done criteria:
+
+\begin{itemize}
+  \item You can write the mismatch vector shape for a given set of bus types.
+  \item You can explain the sign of the update in \code{solve\_power\_flow}.
+\end{itemize}
+
+\section{Session 6: Spend the Most Time on the Jacobian}
+
+Read:
+
+\begin{itemize}
+  \item \href{../src/powerflow/solver.py\#L77}{\code{\_jacobian}}
+\end{itemize}
+
+This is the densest numerical function in the repo. It assembles the analytic
+polar AC power-flow Jacobian:
+
+\[
+\begin{bmatrix}
+\partial P_{\mathrm{calc}} / \partial \theta &
+\partial P_{\mathrm{calc}} / \partial V \\
+\partial Q_{\mathrm{calc}} / \partial \theta &
+\partial Q_{\mathrm{calc}} / \partial V
+\end{bmatrix}
+\]
+
+Rows match equations:
+
+\begin{itemize}
+  \item \code{P} rows for PV and PQ buses.
+  \item \code{Q} rows for PQ buses.
+\end{itemize}
+
+Columns match unknowns:
+
+\begin{itemize}
+  \item Angle columns for PV and PQ buses.
+  \item Voltage-magnitude columns for PQ buses.
+\end{itemize}
+
+The implementation uses derivatives of calculated injections. Since mismatch is
+specified minus calculated, the Newton correction is applied consistently by
+solving:
+
+\begin{align*}
+J \cdot \mathrm{step} &= \mathrm{mismatch}, \\
+x &\leftarrow x + \mathrm{step}.
+\end{align*}
+
+Checkpoint questions:
+
+\begin{itemize}
+  \item Which nested loop fills \code{dP/dtheta}?
+  \item Which nested loop fills \code{dP/dV}?
+  \item Which nested loop fills \code{dQ/dtheta}?
+  \item Which nested loop fills \code{dQ/dV}?
+  \item Why do diagonal and off-diagonal formulas differ?
+  \item How do \code{g = ybus.real} and \code{b = ybus.imag} enter the
+  formulas?
+\end{itemize}
+
+Run:
+
+\begin{verbatim}
+./.venv/bin/python -m pytest tests/test_solver.py -q
+\end{verbatim}
+
+Done criteria:
+
+\begin{itemize}
+  \item You can label each quadrant of the Jacobian in the code.
+  \item For a 1 slack, 1 PV, 2 PQ system, you can state the Jacobian dimensions
+  and row/column ordering.
+\end{itemize}
+
+\section{Session 7: Work One Newton Step by Hand}
+
+Use the two-bus case from
+\href{../tests/test_solver.py\#L38}{\code{test\_two\_bus\_power\_flow\_converges\_and\_balances\_power}}:
+
+\begin{verbatim}
+bus 1: slack, V = 1.0, theta = 0
+bus 2: PQ load, P_load = 0.4, Q_load = 0.2
+branch: r = 0.02, x = 0.04, b = 0.0
+flat start: V1 = 1.0 angle 0, V2 = 1.0 angle 0
+\end{verbatim}
+
+First compute the series admittance:
+
+\[
+y = \frac{1}{0.02 + j0.04} = 10 - j20.
+\]
+
+So the flat-start \code{Ybus} is:
+
+\[
+Y_{\mathrm{bus}} =
+\begin{bmatrix}
+10 - j20 & -10 + j20 \\
+-10 + j20 & 10 - j20
+\end{bmatrix}.
+\]
+
+At flat voltage, \code{Ybus @ V = 0}, so:
+
+\begin{align*}
+P_{\mathrm{calc},2} &= 0, &
+Q_{\mathrm{calc},2} &= 0, \\
+P_{\mathrm{spec},2} &= 0 - 0.4 = -0.4, &
+Q_{\mathrm{spec},2} &= 0 - 0.2 = -0.2.
+\end{align*}
+
+Therefore:
+
+\[
+\mathrm{mismatch} =
+\begin{bmatrix}
+-0.4 \\
+-0.2
+\end{bmatrix}.
+\]
+
+For bus 2 at the flat start:
+
+\[
+G_{22} = 10,\quad B_{22} = -20,\quad V_2 = 1,\quad
+P_{\mathrm{calc},2} = 0,\quad Q_{\mathrm{calc},2} = 0.
+\]
+
+The 2x2 Jacobian is:
+
+\begin{align*}
+\frac{\partial P}{\partial \theta}
+  &= -Q_{\mathrm{calc},2} - B_{22} V_2^2 = 20, \\
+\frac{\partial P}{\partial V}
+  &= P_{\mathrm{calc},2} / V_2 + G_{22} V_2 = 10, \\
+\frac{\partial Q}{\partial \theta}
+  &= P_{\mathrm{calc},2} - G_{22} V_2^2 = -10, \\
+\frac{\partial Q}{\partial V}
+  &= Q_{\mathrm{calc},2} / V_2 - B_{22} V_2 = 20.
+\end{align*}
+
+\[
+J =
+\begin{bmatrix}
+20 & 10 \\
+-10 & 20
+\end{bmatrix}.
+\]
+
+Solve:
+
+\[
+J \cdot \mathrm{step} =
+\begin{bmatrix}
+-0.4 \\
+-0.2
+\end{bmatrix},
+\qquad
+\mathrm{step} =
+\begin{bmatrix}
+-0.012 \\
+-0.016
+\end{bmatrix}.
+\]
+
+So the first update is approximately:
+
+\begin{align*}
+\theta_2 &= 0.0 - 0.012 = -0.012\ \mathrm{radians}, \\
+V_2 &= 1.0 - 0.016 = 0.984\ \pu.
+\end{align*}
+
+Checkpoint questions:
+
+\begin{itemize}
+  \item Why is the first angle update negative?
+  \item Why does the first voltage-magnitude update reduce \code{V2}?
+  \item Which two entries of the state vector exist in this two-bus case?
+  \item Which entries would disappear if bus 2 were PV instead of PQ?
+\end{itemize}
+
+Done criteria:
+
+\begin{itemize}
+  \item You can reproduce the first Newton step without reading the code.
+  \item You can point from each hand-computed quantity to the line that computes
+  it.
+\end{itemize}
+
+\section{Session 8: Interpret the Solved Result}
+
+Read:
+
+\begin{itemize}
+  \item \href{../src/powerflow/solver.py\#L195}{\code{\_build\_result}}
+  \item \href{../src/powerflow/flows.py\#L39}{\code{compute\_branch\_flows}}
+  \item \href{../src/powerflow/solver.py\#L221}{\code{bus\_power\_balance\_residuals}}
+\end{itemize}
+
+After convergence, the code computes solved generation and branch flows. This is
+post-solution interpretation, not part of Newton convergence.
+
+Checkpoint questions:
+
+\begin{itemize}
+  \item Why is slack-bus generation computed after the solve?
+  \item Why is PV-bus reactive generation computed after the solve?
+  \item How are branch from-end and to-end currents computed?
+  \item Why are branch losses the sum of the two terminal complex powers?
+\end{itemize}
+
+Run:
+
+\begin{verbatim}
+./.venv/bin/python -m pytest tests/test_flows.py -q
+\end{verbatim}
+
+Done criteria:
+
+\begin{itemize}
+  \item You can explain how solved bus voltages become branch \code{P/Q} flows.
+  \item You can distinguish mismatch convergence from post-solve reporting.
+\end{itemize}
+
+\section{Session 9: Validate the Complete Implementation}
+
+Run the focused tests first:
+
+\begin{verbatim}
+./.venv/bin/python -m pytest \
+  tests/test_ybus.py tests/test_solver.py tests/test_flows.py -q
+\end{verbatim}
+
+Then run the broader suite:
+
+\begin{verbatim}
+./.venv/bin/python -m pytest -q
+\end{verbatim}
+
+The small tests are best for understanding individual equations. The IEEE tests
+are best for confirming that the complete implementation matches static
+MATPOWER fixtures when those fixtures are present.
+
+Done criteria:
+
+\begin{itemize}
+  \item You know which test protects each concept.
+  \item You can explain why a solver can pass a two-bus test but still need IEEE
+  case validation.
+\end{itemize}
+
+\section{Common Confusions}
+
+\begin{itemize}
+  \item Slack-bus \code{p\_gen} and \code{q\_gen} in the input are not fixed
+  mismatch equations; the solved slack injection is computed from the final
+  network state.
+  \item PV-bus \code{q\_gen} is solved, not fixed. This repo does not implement
+  reactive power limits or PV-to-PQ conversion.
+  \item PQ-bus voltage magnitude is unknown, even if the input provides an
+  initial value.
+  \item The mismatch excludes slack equations because the slack bus absorbs the
+  active-power residual and fixes the angle reference.
+  \item The mismatch excludes PV reactive equations because PV voltage magnitude
+  is fixed and reactive output is allowed to move.
+  \item \code{power\_injections} computes injections for every bus, but
+  \code{\_mismatch} selects only the equations that belong in the Newton solve.
+  \item \code{build\_ybus} builds a global network model;
+  \code{compute\_branch\_flows} uses the same branch model locally for each line
+  after convergence.
+  \item The code stores angles in radians. Some fixtures and reports may display
+  degrees.
+  \item The code solves \code{J * step = mismatch} because the implementation
+  uses the Jacobian of calculated injections together with a
+  specified-minus-calculated mismatch convention.
+\end{itemize}
+
+\section{Optional Theory Backup}
+
+If you want more context while reading the code, use:
+
+\begin{itemize}
+  \item \href{ieee9_power_flow_lecture_note.tex}{\code{docs/ieee9\_power\_flow\_lecture\_note.tex}},
+  especially the Newton--Raphson appendix.
+  \item \href{powerflow_v0_prompt.md}{\code{docs/powerflow\_v0\_prompt.md}},
+  which describes the original implementation goals and constraints.
+\end{itemize}
+
+Use these as references only after you have tried to trace the code path. The
+fastest learning loop is still: code, tiny example, test, explanation.
+
+\section{Files to Delay Until Later}
+
+These files are useful, but they are not the best starting point for
+understanding the numerical solve:
+
+\begin{itemize}
+  \item \href{../src/powerflow/io.py}{\code{src/powerflow/io.py}}: case loading.
+  \item \href{../src/powerflow/case.py}{\code{src/powerflow/case.py}}: data
+  structures and validation.
+  \item \href{../src/powerflow/contingency.py}{\code{src/powerflow/contingency.py}}:
+  repeated solves for outage analysis.
+  \item \href{../scripts/run_case9_n1.py}{\code{scripts/run\_case9\_n1.py}}:
+  command-line report wrapper.
+\end{itemize}
+
+Read these after the Newton--Raphson path is clear.
+
+\section{Final Self-Test}
+
+You are done with the core study plan when you can answer these without looking
+at the code:
+
+\begin{itemize}
+  \item What is the Newton state vector for a network with 1 slack, 2 PV, and 6
+  PQ buses?
+  \item Why is the slack bus excluded from both \code{P} and \code{Q} mismatch
+  equations?
+  \item Why is a PV bus included in \code{P} mismatch but excluded from
+  \code{Q} mismatch?
+  \item What does \code{S = V * conj(Ybus @ V)} compute?
+  \item How is \code{P\_spec} different from \code{P\_calc}?
+  \item What are the four Jacobian blocks?
+  \item Why does the code update only \code{v\_angle[angle\_buses]} and
+  \code{v\_magnitude[pq\_buses]}?
+  \item How do branch flows differ from bus injections?
+  \item Which function would you inspect first if voltages fail to converge?
+  \item Which function would you inspect first if voltages converge but branch
+  losses look wrong?
+\end{itemize}
+
+\end{document}

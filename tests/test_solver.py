@@ -107,3 +107,34 @@ def test_invalid_branch_reference_raises_before_solving():
 
     with pytest.raises(ValueError, match="nonexistent to_bus"):
         solve_power_flow(case)
+
+
+def test_disconnected_network_raises_before_solving():
+    """Disconnected topology is rejected before Newton iteration starts."""
+    case = Case(
+        base_mva=100.0,
+        buses=[
+            Bus(1, "slack", 0.0, 0.0, 0.0, 0.0, 1.0, 0.0),
+            Bus(2, "pq", 0.1, 0.0, 0.0, 0.0, 1.0, 0.0),
+            Bus(3, "pq", 0.1, 0.0, 0.0, 0.0, 1.0, 0.0),
+        ],
+        branches=[Branch(1, 2, r=0.02, x=0.04, b=0.0)],
+    )
+
+    with pytest.raises(ValueError, match="disconnected"):
+        solve_power_flow(case)
+
+
+def test_out_of_service_branch_raises_before_solving():
+    """v0 rejects disabled branches instead of silently handling them."""
+    case = Case(
+        base_mva=100.0,
+        buses=[
+            Bus(1, "slack", 0.0, 0.0, 0.0, 0.0, 1.0, 0.0),
+            Bus(2, "pq", 0.1, 0.0, 0.0, 0.0, 1.0, 0.0),
+        ],
+        branches=[Branch(1, 2, r=0.02, x=0.04, b=0.0, status=0)],
+    )
+
+    with pytest.raises(ValueError, match="in-service"):
+        solve_power_flow(case)

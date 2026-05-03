@@ -98,3 +98,26 @@ def validate_case(case: Case) -> None:
             raise ValueError(f"branch {branch.from_bus}->{branch.to_bus} has zero impedance")
         if branch.tap_ratio == 0.0:
             raise ValueError(f"branch {branch.from_bus}->{branch.to_bus} has zero tap ratio")
+
+    _validate_connected(case, seen)
+
+
+def _validate_connected(case: Case, bus_ids: set[int]) -> None:
+    adjacency = {bus_id: set() for bus_id in bus_ids}
+    for branch in case.branches:
+        adjacency[branch.from_bus].add(branch.to_bus)
+        adjacency[branch.to_bus].add(branch.from_bus)
+
+    start = case.buses[0].id
+    visited = {start}
+    stack = [start]
+    while stack:
+        current = stack.pop()
+        for neighbor in adjacency[current]:
+            if neighbor not in visited:
+                visited.add(neighbor)
+                stack.append(neighbor)
+
+    if visited != bus_ids:
+        missing = sorted(bus_ids - visited)
+        raise ValueError(f"case network is disconnected; unreachable buses: {missing}")

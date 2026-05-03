@@ -1,0 +1,2084 @@
+{
+  "base_case": {
+    "branch_reactive_endpoint_sum_mvar": -92.1601252191,
+    "branch_reactive_endpoint_sum_pu": -0.9216012522,
+    "converged": true,
+    "generator_outputs": [
+      {
+        "bus_id": 1,
+        "bus_type": "slack",
+        "p_gen_mw": 71.6410214745,
+        "p_gen_pu": 0.7164102147,
+        "q_gen_mvar": 27.0459235335,
+        "q_gen_pu": 0.2704592353
+      },
+      {
+        "bus_id": 2,
+        "bus_type": "pv",
+        "p_gen_mw": 163.0,
+        "p_gen_pu": 1.63,
+        "q_gen_mvar": 6.6536603184,
+        "q_gen_pu": 0.0665366032
+      },
+      {
+        "bus_id": 3,
+        "bus_type": "pv",
+        "p_gen_mw": 85.0,
+        "p_gen_pu": 0.85,
+        "q_gen_mvar": -10.859709071,
+        "q_gen_pu": -0.1085970907
+      }
+    ],
+    "iterations": 4,
+    "max_mismatch_pu": 0.0,
+    "max_voltage_bus_id": 1,
+    "max_voltage_pu": 1.04,
+    "min_voltage_bus_id": 9,
+    "min_voltage_pu": 0.995630858,
+    "total_real_loss_mw": 4.6410214745,
+    "total_real_loss_pu": 0.0464102147
+  },
+  "contingencies": [
+    {
+      "branch_count": 8,
+      "branch_flows": [],
+      "branch_reactive_endpoint_sum_mvar": null,
+      "branch_reactive_endpoint_sum_pu": null,
+      "contingency_id": "1-4",
+      "converged": false,
+      "from_bus": 1,
+      "generator_outputs": [],
+      "group": "generator_connection",
+      "islanded_buses": [
+        1
+      ],
+      "iterations": null,
+      "largest_abs_branch_end_mw": null,
+      "largest_abs_voltage_delta_bus_id": null,
+      "largest_abs_voltage_delta_pu": null,
+      "max_mismatch_pu": null,
+      "max_voltage_bus_id": null,
+      "max_voltage_pu": null,
+      "min_voltage_bus_id": null,
+      "min_voltage_pu": null,
+      "notes": [
+        "slack bus 1 islanded; surviving load component has no slack reference; AC power flow not solved"
+      ],
+      "status": "slack_islanded",
+      "surviving_buses": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "to_bus": 4,
+      "total_real_loss_mw": null,
+      "total_real_loss_pu": null,
+      "voltage_violations": [],
+      "voltages": []
+    },
+    {
+      "branch_count": 8,
+      "branch_flows": [
+        {
+          "branch_reactive_endpoint_sum_mvar": 3.1245700371,
+          "branch_reactive_endpoint_sum_pu": 0.0312457004,
+          "from_bus": 1,
+          "p_from_mw": 73.1359653705,
+          "p_from_pu": 0.7313596537,
+          "p_loss_mw": 0.0,
+          "p_loss_pu": 0.0,
+          "p_to_mw": -73.1359653705,
+          "p_to_pu": -0.7313596537,
+          "q_from_mvar": 22.767932494,
+          "q_from_pu": 0.2276793249,
+          "q_to_mvar": -19.6433624569,
+          "q_to_pu": -0.1964336246,
+          "to_bus": 4
+        },
+        {
+          "branch_reactive_endpoint_sum_mvar": -18.4751237654,
+          "branch_reactive_endpoint_sum_pu": -0.1847512377,
+          "from_bus": 5,
+          "p_from_mw": -89.9999999991,
+          "p_from_pu": -0.9,
+          "p_loss_mw": 3.6490216189,
+          "p_loss_pu": 0.0364902162,
+          "p_to_mw": 93.649021618,
+          "p_to_pu": 0.9364902162,
+          "q_from_mvar": -29.9999999994,
+          "q_from_pu": -0.3,
+          "q_to_mvar": 11.524876234,
+          "q_to_pu": 0.1152487623,
+          "to_bus": 6
+        },
+        {
+          "branch_reactive_endpoint_sum_mvar": 4.1821932324,
+          "branch_reactive_endpoint_sum_pu": 0.0418219323,
+          "from_bus": 3,
+          "p_from_mw": 85.0,
+          "p_from_pu": 0.85,
+          "p_loss_mw": 0.0,
+          "p_loss_pu": 0.0,
+          "p_to_mw": -85.0,
+          "p_to_pu": -0.85,
+          "q_from_mvar": 16.5272948686,
+          "q_from_pu": 0.1652729487,
+          "q_to_mvar": -12.3451016362,
+          "q_to_pu": -0.1234510164,
+          "to_bus": 6
+        },
+        {
+          "branch_reactive_endpoint_sum_mvar": -21.1786275776,
+          "branch_reactive_endpoint_sum_pu": -0.2117862758,
+          "from_bus": 6,
+          "p_from_mw": -8.6490216186,
+          "p_from_pu": -0.0864902162,
+          "p_loss_mw": 0.0241621417,
+          "p_loss_pu": 0.0002416214,
+          "p_to_mw": 8.6731837604,
+          "p_to_pu": 0.0867318376,
+          "q_from_mvar": 0.8202254025,
+          "q_from_pu": 0.008202254,
+          "q_to_mvar": -21.9988529801,
+          "q_to_pu": -0.2199885298,
+          "to_bus": 7
+        },
+        {
+          "branch_reactive_endpoint_sum_mvar": -6.9099067453,
+          "branch_reactive_endpoint_sum_pu": -0.0690990675,
+          "from_bus": 7,
+          "p_from_mw": -108.6731837604,
+          "p_from_pu": -1.0867318376,
+          "p_loss_mw": 0.9939039281,
+          "p_loss_pu": 0.0099390393,
+          "p_to_mw": 109.6670876885,
+          "p_to_pu": 1.0966708769,
+          "q_from_mvar": -13.0011470198,
+          "q_from_pu": -0.1300114702,
+          "q_to_mvar": 6.0912402745,
+          "q_to_pu": 0.0609124027,
+          "to_bus": 8
+        },
+        {
+          "branch_reactive_endpoint_sum_mvar": 15.8973990233,
+          "branch_reactive_endpoint_sum_pu": 0.1589739902,
+          "from_bus": 8,
+          "p_from_mw": -163.0,
+          "p_from_pu": -1.63,
+          "p_loss_mw": 0.0,
+          "p_loss_pu": 0.0,
+          "p_to_mw": 163.0,
+          "p_to_pu": 1.63,
+          "q_from_mvar": 3.4664795841,
+          "q_from_pu": 0.0346647958,
+          "q_to_mvar": 12.4309194391,
+          "q_to_pu": 0.1243091944,
+          "to_bus": 2
+        },
+        {
+          "branch_reactive_endpoint_sum_mvar": -26.8065439595,
+          "branch_reactive_endpoint_sum_pu": -0.2680654396,
+          "from_bus": 8,
+          "p_from_mw": 53.3329123115,
+          "p_from_pu": 0.5333291231,
+          "p_loss_mw": 0.8836585552,
+          "p_loss_pu": 0.0088365856,
+          "p_to_mw": -52.4492537563,
+          "p_to_pu": -0.5244925376,
+          "q_from_mvar": -9.5577198586,
+          "q_from_pu": -0.0955771986,
+          "q_to_mvar": -17.2488241008,
+          "q_to_pu": -0.172488241,
+          "to_bus": 9
+        },
+        {
+          "branch_reactive_endpoint_sum_mvar": -13.1078134422,
+          "branch_reactive_endpoint_sum_pu": -0.1310781344,
+          "from_bus": 9,
+          "p_from_mw": -72.5507462437,
+          "p_from_pu": -0.7255074624,
+          "p_loss_mw": 0.5852191268,
+          "p_loss_pu": 0.0058521913,
+          "p_to_mw": 73.1359653705,
+          "p_to_pu": 0.7313596537,
+          "q_from_mvar": -32.7511758991,
+          "q_from_pu": -0.327511759,
+          "q_to_mvar": 19.6433624569,
+          "q_to_pu": 0.1964336246,
+          "to_bus": 4
+        }
+      ],
+      "branch_reactive_endpoint_sum_mvar": -63.2738531973,
+      "branch_reactive_endpoint_sum_pu": -0.632738532,
+      "contingency_id": "4-5",
+      "converged": true,
+      "from_bus": 4,
+      "generator_outputs": [
+        {
+          "bus_id": 1,
+          "bus_type": "slack",
+          "p_gen_mw": 73.1359653705,
+          "p_gen_pu": 0.7313596537,
+          "q_gen_mvar": 22.767932494,
+          "q_gen_pu": 0.2276793249
+        },
+        {
+          "bus_id": 2,
+          "bus_type": "pv",
+          "p_gen_mw": 163.0,
+          "p_gen_pu": 1.63,
+          "q_gen_mvar": 12.4309194391,
+          "q_gen_pu": 0.1243091944
+        },
+        {
+          "bus_id": 3,
+          "bus_type": "pv",
+          "p_gen_mw": 85.0,
+          "p_gen_pu": 0.85,
+          "q_gen_mvar": 16.5272948686,
+          "q_gen_pu": 0.1652729487
+        }
+      ],
+      "group": "transmission_loop",
+      "islanded_buses": [],
+      "iterations": 4,
+      "largest_abs_branch_end_mw": 163.0,
+      "largest_abs_voltage_delta_bus_id": 5,
+      "largest_abs_voltage_delta_pu": 0.0708332527,
+      "max_mismatch_pu": 0.0,
+      "max_voltage_bus_id": 1,
+      "max_voltage_pu": 1.04,
+      "min_voltage_bus_id": 5,
+      "min_voltage_pu": 0.9418210713,
+      "notes": [],
+      "status": "solved",
+      "surviving_buses": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "to_bus": 5,
+      "total_real_loss_mw": 6.1359653707,
+      "total_real_loss_pu": 0.0613596537,
+      "voltage_violations": [
+        {
+          "bus_id": 5,
+          "kind": "low",
+          "limit_pu": 0.95,
+          "v_post_pu": 0.9418210713
+        }
+      ],
+      "voltages": [
+        {
+          "bus_id": 1,
+          "delta_from_base_pu": 0.0,
+          "v_base_pu": 1.04,
+          "v_post_pu": 1.04
+        },
+        {
+          "bus_id": 2,
+          "delta_from_base_pu": 0.0,
+          "v_base_pu": 1.025,
+          "v_post_pu": 1.025
+        },
+        {
+          "bus_id": 3,
+          "delta_from_base_pu": 0.0,
+          "v_base_pu": 1.025,
+          "v_post_pu": 1.025
+        },
+        {
+          "bus_id": 4,
+          "delta_from_base_pu": 0.0023998653,
+          "v_base_pu": 1.0257883928,
+          "v_post_pu": 1.0281882581
+        },
+        {
+          "bus_id": 5,
+          "delta_from_base_pu": -0.0708332527,
+          "v_base_pu": 1.012654324,
+          "v_post_pu": 0.9418210713
+        },
+        {
+          "bus_id": 6,
+          "delta_from_base_pu": -0.0156397271,
+          "v_base_pu": 1.032352949,
+          "v_post_pu": 1.0167132219
+        },
+        {
+          "bus_id": 7,
+          "delta_from_base_pu": -0.0096308446,
+          "v_base_pu": 1.0158825836,
+          "v_post_pu": 1.006251739
+        },
+        {
+          "bus_id": 8,
+          "delta_from_base_pu": -0.0035060868,
+          "v_base_pu": 1.0257693724,
+          "v_post_pu": 1.0222632856
+        },
+        {
+          "bus_id": 9,
+          "delta_from_base_pu": 0.0031792517,
+          "v_base_pu": 0.995630858,
+          "v_post_pu": 0.9988101098
+        }
+      ]
+    },
+    {
+      "branch_count": 8,
+      "branch_flows": [
+        {
+          "branch_reactive_endpoint_sum_mvar": 5.3884078142,
+          "branch_reactive_endpoint_sum_pu": 0.0538840781,
+          "from_bus": 1,
+          "p_from_mw": 76.4913804242,
+          "p_from_pu": 0.7649138042,
+          "p_loss_mw": 0.0,
+          "p_loss_pu": 0.0,
+          "p_to_mw": -76.4913804242,
+          "p_to_pu": -0.7649138042,
+          "q_from_mvar": 65.3245832128,
+          "q_from_pu": 0.6532458321,
+          "q_to_mvar": -59.9361753986,
+          "q_to_pu": -0.599361754,
+          "to_bus": 4
+        },
+        {
+          "branch_reactive_endpoint_sum_mvar": -6.7843642579,
+          "branch_reactive_endpoint_sum_pu": -0.0678436426,
+          "from_bus": 4,
+          "p_from_mw": 91.5761397873,
+          "p_from_pu": 0.9157613979,
+          "p_loss_mw": 1.5761397875,
+          "p_loss_pu": 0.0157613979,
+          "p_to_mw": -89.9999999999,
+          "p_to_pu": -0.9,
+          "q_from_mvar": 23.215635742,
+          "q_from_pu": 0.2321563574,
+          "q_to_mvar": -30.0,
+          "q_to_pu": -0.3,
+          "to_bus": 5
+        },
+        {
+          "branch_reactive_endpoint_sum_mvar": 4.0425037351,
+          "branch_reactive_endpoint_sum_pu": 0.0404250374,
+          "from_bus": 3,
+          "p_from_mw": 85.0,
+          "p_from_pu": 0.85,
+          "p_loss_mw": 0.0,
+          "p_loss_pu": 0.0,
+          "p_to_mw": -85.0,
+          "p_to_pu": -0.85,
+          "q_from_mvar": 4.7650402636,
+          "q_from_pu": 0.0476504026,
+          "q_to_mvar": -0.7225365284,
+          "q_to_pu": -0.0072253653,
+          "to_bus": 6
+        },
+        {
+          "branch_reactive_endpoint_sum_mvar": -14.425126136,
+          "branch_reactive_endpoint_sum_pu": -0.1442512614,
+          "from_bus": 6,
+          "p_from_mw": 85.0,
+          "p_from_pu": 0.85,
+          "p_loss_mw": 0.8363262003,
+          "p_loss_pu": 0.008363262,
+          "p_to_mw": -84.1636737997,
+          "p_to_pu": -0.841636738,
+          "q_from_mvar": 0.7225365284,
+          "q_from_pu": 0.0072253653,
+          "q_to_mvar": -15.1476626644,
+          "q_to_pu": -0.1514766266,
+          "to_bus": 7
+        },
+        {
+          "branch_reactive_endpoint_sum_mvar": -14.9294160911,
+          "branch_reactive_endpoint_sum_pu": -0.1492941609,
+          "from_bus": 7,
+          "p_from_mw": -15.8363262003,
+          "p_from_pu": -0.158363262,
+          "p_loss_mw": 0.0338521185,
+          "p_loss_pu": 0.0003385212,
+          "p_to_mw": 15.8701783188,
+          "p_to_pu": 0.1587017832,
+          "q_from_mvar": -19.8523373356,
+          "q_from_pu": -0.1985233734,
+          "q_to_mvar": 4.9229212445,
+          "q_to_pu": 0.0492292124,
+          "to_bus": 8
+        },
+        {
+          "branch_reactive_endpoint_sum_mvar": 16.1293130009,
+          "branch_reactive_endpoint_sum_pu": 0.16129313,
+          "from_bus": 8,
+          "p_from_mw": -163.0,
+          "p_from_pu": -1.63,
+          "p_loss_mw": 0.0,
+          "p_loss_pu": 0.0,
+          "p_to_mw": 163.0,
+          "p_to_pu": 1.63,
+          "q_from_mvar": -7.2025354998,
+          "q_from_pu": -0.072025355,
+          "q_to_mvar": 23.3318485007,
+          "q_to_pu": 0.233318485,
+          "to_bus": 2
+        },
+        {
+          "branch_reactive_endpoint_sum_mvar": 4.1827205329,
+          "branch_reactive_endpoint_sum_pu": 0.0418272053,
+          "from_bus": 8,
+          "p_from_mw": 147.1298216812,
+          "p_from_pu": 1.4712982168,
+          "p_loss_mw": 6.8164974877,
+          "p_loss_pu": 0.0681649749,
+          "p_to_mw": -140.3133241935,
+          "p_to_pu": -1.4031332419,
+          "q_from_mvar": 2.2796142554,
+          "q_from_pu": 0.0227961426,
+          "q_to_mvar": 1.9031062775,
+          "q_to_pu": 0.0190310628,
+          "to_bus": 9
+        },
+        {
+          "branch_reactive_endpoint_sum_mvar": -15.1825666204,
+          "branch_reactive_endpoint_sum_pu": -0.1518256662,
+          "from_bus": 9,
+          "p_from_mw": 15.3133241938,
+          "p_from_pu": 0.1531332419,
+          "p_loss_mw": 0.2285648303,
+          "p_loss_pu": 0.0022856483,
+          "p_to_mw": -15.0847593635,
+          "p_to_pu": -0.1508475936,
+          "q_from_mvar": -51.9031062771,
+          "q_from_pu": -0.5190310628,
+          "q_to_mvar": 36.7205396567,
+          "q_to_pu": 0.3672053966,
+          "to_bus": 4
+        }
+      ],
+      "branch_reactive_endpoint_sum_mvar": -21.5785280224,
+      "branch_reactive_endpoint_sum_pu": -0.2157852802,
+      "contingency_id": "5-6",
+      "converged": true,
+      "from_bus": 5,
+      "generator_outputs": [
+        {
+          "bus_id": 1,
+          "bus_type": "slack",
+          "p_gen_mw": 76.4913804242,
+          "p_gen_pu": 0.7649138042,
+          "q_gen_mvar": 65.3245832128,
+          "q_gen_pu": 0.6532458321
+        },
+        {
+          "bus_id": 2,
+          "bus_type": "pv",
+          "p_gen_mw": 163.0,
+          "p_gen_pu": 1.63,
+          "q_gen_mvar": 23.3318485007,
+          "q_gen_pu": 0.233318485
+        },
+        {
+          "bus_id": 3,
+          "bus_type": "pv",
+          "p_gen_mw": 85.0,
+          "p_gen_pu": 0.85,
+          "q_gen_mvar": 4.7650402636,
+          "q_gen_pu": 0.0476504026
+        }
+      ],
+      "group": "transmission_loop",
+      "islanded_buses": [],
+      "iterations": 4,
+      "largest_abs_branch_end_mw": 163.0,
+      "largest_abs_voltage_delta_bus_id": 5,
+      "largest_abs_voltage_delta_pu": 0.0487876066,
+      "max_mismatch_pu": 0.0,
+      "max_voltage_bus_id": 1,
+      "max_voltage_pu": 1.04,
+      "min_voltage_bus_id": 5,
+      "min_voltage_pu": 0.9638667175,
+      "notes": [],
+      "status": "solved",
+      "surviving_buses": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "to_bus": 6,
+      "total_real_loss_mw": 9.4913804243,
+      "total_real_loss_pu": 0.0949138042,
+      "voltage_violations": [],
+      "voltages": [
+        {
+          "bus_id": 1,
+          "delta_from_base_pu": 0.0,
+          "v_base_pu": 1.04,
+          "v_post_pu": 1.04
+        },
+        {
+          "bus_id": 2,
+          "delta_from_base_pu": 0.0,
+          "v_base_pu": 1.025,
+          "v_post_pu": 1.025
+        },
+        {
+          "bus_id": 3,
+          "delta_from_base_pu": 0.0,
+          "v_base_pu": 1.025,
+          "v_post_pu": 1.025
+        },
+        {
+          "bus_id": 4,
+          "delta_from_base_pu": -0.0210746012,
+          "v_base_pu": 1.0257883928,
+          "v_post_pu": 1.0047137916
+        },
+        {
+          "bus_id": 5,
+          "delta_from_base_pu": -0.0487876066,
+          "v_base_pu": 1.012654324,
+          "v_post_pu": 0.9638667175
+        },
+        {
+          "bus_id": 6,
+          "delta_from_base_pu": -0.0089227951,
+          "v_base_pu": 1.032352949,
+          "v_post_pu": 1.0234301539
+        },
+        {
+          "bus_id": 7,
+          "delta_from_base_pu": -0.0104488281,
+          "v_base_pu": 1.0158825836,
+          "v_post_pu": 1.0054337555
+        },
+        {
+          "bus_id": 8,
+          "delta_from_base_pu": -0.0101212985,
+          "v_base_pu": 1.0257693724,
+          "v_post_pu": 1.0156480739
+        },
+        {
+          "bus_id": 9,
+          "delta_from_base_pu": -0.0278422934,
+          "v_base_pu": 0.995630858,
+          "v_post_pu": 0.9677885646
+        }
+      ]
+    },
+    {
+      "branch_count": 8,
+      "branch_flows": [
+        {
+          "branch_reactive_endpoint_sum_mvar": 13.1783104565,
+          "branch_reactive_endpoint_sum_pu": 0.1317831046,
+          "from_bus": 1,
+          "p_from_mw": 155.6285281855,
+          "p_from_pu": 1.5562852819,
+          "p_loss_mw": 0.0,
+          "p_loss_pu": 0.0,
+          "p_to_mw": -155.6285281855,
+          "p_to_pu": -1.5562852819,
+          "q_from_mvar": 22.9281429399,
+          "q_from_pu": 0.2292814294,
+          "q_to_mvar": -9.7498324834,
+          "q_to_pu": -0.0974983248,
+          "to_bus": 4
+        },
+        {
+          "branch_reactive_endpoint_sum_mvar": -10.7144691093,
+          "branch_reactive_endpoint_sum_pu": -0.1071446911,
+          "from_bus": 4,
+          "p_from_mw": 82.5619981237,
+          "p_from_pu": 0.8256199812,
+          "p_loss_mw": 1.090353008,
+          "p_loss_pu": 0.0109035301,
+          "p_to_mw": -81.4716451157,
+          "p_to_pu": -0.8147164512,
+          "q_from_mvar": -8.4461211709,
+          "q_from_pu": -0.0844612117,
+          "q_to_mvar": -2.2683479385,
+          "q_to_pu": -0.0226834794,
+          "to_bus": 5
+        },
+        {
+          "branch_reactive_endpoint_sum_mvar": -37.6739300733,
+          "branch_reactive_endpoint_sum_pu": -0.3767393007,
+          "from_bus": 5,
+          "p_from_mw": -8.5283548843,
+          "p_from_pu": -0.0852835488,
+          "p_loss_mw": 0.058361824,
+          "p_loss_pu": 0.0005836182,
+          "p_to_mw": 8.5867167083,
+          "p_to_pu": 0.0858671671,
+          "q_from_mvar": -27.7316520615,
+          "q_from_pu": -0.2773165206,
+          "q_to_mvar": -9.9422780117,
+          "q_to_pu": -0.0994227801,
+          "to_bus": 6
+        },
+        {
+          "branch_reactive_endpoint_sum_mvar": -21.6306272881,
+          "branch_reactive_endpoint_sum_pu": -0.2163062729,
+          "from_bus": 6,
+          "p_from_mw": -8.5867167083,
+          "p_from_pu": -0.0858671671,
+          "p_loss_mw": 0.0577849797,
+          "p_loss_pu": 0.0005778498,
+          "p_to_mw": 8.644501688,
+          "p_to_pu": 0.0864450169,
+          "q_from_mvar": 9.9422780117,
+          "q_from_pu": 0.0994227801,
+          "q_to_mvar": -31.5729052999,
+          "q_to_pu": -0.315729053,
+          "to_bus": 7
+        },
+        {
+          "branch_reactive_endpoint_sum_mvar": -7.4079142026,
+          "branch_reactive_endpoint_sum_pu": -0.074079142,
+          "from_bus": 7,
+          "p_from_mw": -108.6445016881,
+          "p_from_pu": -1.0864450169,
+          "p_loss_mw": 0.9678484643,
+          "p_loss_pu": 0.0096784846,
+          "p_to_mw": 109.6123501523,
+          "p_to_pu": 1.0961235015,
+          "q_from_mvar": -3.4270947001,
+          "q_from_pu": -0.034270947,
+          "q_to_mvar": -3.9808195025,
+          "q_to_pu": -0.039808195,
+          "to_bus": 8
+        },
+        {
+          "branch_reactive_endpoint_sum_mvar": 15.8115292387,
+          "branch_reactive_endpoint_sum_pu": 0.1581152924,
+          "from_bus": 8,
+          "p_from_mw": -163.0,
+          "p_from_pu": -1.63,
+          "p_loss_mw": 0.0,
+          "p_loss_pu": 0.0,
+          "p_to_mw": 163.0,
+          "p_to_pu": 1.63,
+          "q_from_mvar": 12.6208161125,
+          "q_from_pu": 0.1262081611,
+          "q_to_mvar": 3.1907131262,
+          "q_to_pu": 0.0319071313,
+          "to_bus": 2
+        },
+        {
+          "branch_reactive_endpoint_sum_mvar": -27.1197285706,
+          "branch_reactive_endpoint_sum_pu": -0.2711972857,
+          "from_bus": 8,
+          "p_from_mw": 53.3876498477,
+          "p_from_pu": 0.5338764985,
+          "p_loss_mw": 0.8804349825,
+          "p_loss_pu": 0.0088043498,
+          "p_to_mw": -52.5072148651,
+          "p_to_pu": -0.5250721487,
+          "q_from_mvar": -8.63999661,
+          "q_from_pu": -0.0863999661,
+          "q_to_mvar": -18.4797319606,
+          "q_to_pu": -0.1847973196,
+          "to_bus": 9
+        },
+        {
+          "branch_reactive_endpoint_sum_mvar": -13.3243143851,
+          "branch_reactive_endpoint_sum_pu": -0.1332431439,
+          "from_bus": 9,
+          "p_from_mw": -72.4927851349,
+          "p_from_pu": -0.7249278513,
+          "p_loss_mw": 0.573744927,
+          "p_loss_pu": 0.0057374493,
+          "p_to_mw": 73.0665300618,
+          "p_to_pu": 0.7306653006,
+          "q_from_mvar": -31.5202680394,
+          "q_from_pu": -0.3152026804,
+          "q_to_mvar": 18.1959536543,
+          "q_to_pu": 0.1819595365,
+          "to_bus": 4
+        }
+      ],
+      "branch_reactive_endpoint_sum_mvar": -88.8811439339,
+      "branch_reactive_endpoint_sum_pu": -0.8888114393,
+      "contingency_id": "3-6",
+      "converged": true,
+      "from_bus": 3,
+      "generator_outputs": [
+        {
+          "bus_id": 1,
+          "bus_type": "slack",
+          "p_gen_mw": 155.6285281855,
+          "p_gen_pu": 1.5562852819,
+          "q_gen_mvar": 22.9281429399,
+          "q_gen_pu": 0.2292814294
+        },
+        {
+          "bus_id": 2,
+          "bus_type": "pv",
+          "p_gen_mw": 163.0,
+          "p_gen_pu": 1.63,
+          "q_gen_mvar": 3.1907131262,
+          "q_gen_pu": 0.0319071313
+        }
+      ],
+      "group": "generator_connection",
+      "islanded_buses": [
+        3
+      ],
+      "iterations": 4,
+      "largest_abs_branch_end_mw": 163.0,
+      "largest_abs_voltage_delta_bus_id": 5,
+      "largest_abs_voltage_delta_pu": 0.0073519365,
+      "max_mismatch_pu": 0.0,
+      "max_voltage_bus_id": 1,
+      "max_voltage_pu": 1.04,
+      "min_voltage_bus_id": 9,
+      "min_voltage_pu": 1.0027634763,
+      "notes": [
+        "bus 3 islanded; 0.85 p.u. / 85 MW of generation absorbed by slack"
+      ],
+      "status": "partial_island",
+      "surviving_buses": [
+        1,
+        2,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "to_bus": 6,
+      "total_real_loss_mw": 3.6285281855,
+      "total_real_loss_pu": 0.0362852819,
+      "voltage_violations": [],
+      "voltages": [
+        {
+          "bus_id": 1,
+          "delta_from_base_pu": 0.0,
+          "v_base_pu": 1.04,
+          "v_post_pu": 1.04
+        },
+        {
+          "bus_id": 2,
+          "delta_from_base_pu": 0.0,
+          "v_base_pu": 1.025,
+          "v_post_pu": 1.025
+        },
+        {
+          "bus_id": 4,
+          "delta_from_base_pu": 0.0051226053,
+          "v_base_pu": 1.0257883928,
+          "v_post_pu": 1.0309109982
+        },
+        {
+          "bus_id": 5,
+          "delta_from_base_pu": 0.0073519365,
+          "v_base_pu": 1.012654324,
+          "v_post_pu": 1.0200062605
+        },
+        {
+          "bus_id": 6,
+          "delta_from_base_pu": 0.0061499259,
+          "v_base_pu": 1.032352949,
+          "v_post_pu": 1.0385028749
+        },
+        {
+          "bus_id": 7,
+          "delta_from_base_pu": 0.0030716672,
+          "v_base_pu": 1.0158825836,
+          "v_post_pu": 1.0189542508
+        },
+        {
+          "bus_id": 8,
+          "delta_from_base_pu": 0.0021016382,
+          "v_base_pu": 1.0257693724,
+          "v_post_pu": 1.0278710106
+        },
+        {
+          "bus_id": 9,
+          "delta_from_base_pu": 0.0071326182,
+          "v_base_pu": 0.995630858,
+          "v_post_pu": 1.0027634763
+        }
+      ]
+    },
+    {
+      "branch_count": 8,
+      "branch_flows": [
+        {
+          "branch_reactive_endpoint_sum_mvar": 3.3717633315,
+          "branch_reactive_endpoint_sum_pu": 0.0337176333,
+          "from_bus": 1,
+          "p_from_mw": 72.353185287,
+          "p_from_pu": 0.7235318529,
+          "p_loss_mw": 0.0,
+          "p_loss_pu": 0.0,
+          "p_to_mw": -72.353185287,
+          "p_to_pu": -0.7235318529,
+          "q_from_mvar": 33.1125177936,
+          "q_from_pu": 0.3311251779,
+          "q_to_mvar": -29.7407544621,
+          "q_to_pu": -0.2974075446,
+          "to_bus": 4
+        },
+        {
+          "branch_reactive_endpoint_sum_mvar": -16.0762804522,
+          "branch_reactive_endpoint_sum_pu": -0.1607628045,
+          "from_bus": 4,
+          "p_from_mw": 7.678268764,
+          "p_from_pu": 0.0767826876,
+          "p_loss_mw": 0.0407808453,
+          "p_loss_pu": 0.0004078085,
+          "p_to_mw": -7.6374879187,
+          "p_to_pu": -0.0763748792,
+          "q_from_mvar": 5.5913336919,
+          "q_from_pu": 0.0559133369,
+          "q_to_mvar": -21.6676141441,
+          "q_to_pu": -0.2166761414,
+          "to_bus": 5
+        },
+        {
+          "branch_reactive_endpoint_sum_mvar": -25.8470263857,
+          "branch_reactive_endpoint_sum_pu": -0.2584702639,
+          "from_bus": 5,
+          "p_from_mw": -82.3625120813,
+          "p_from_pu": -0.8236251208,
+          "p_loss_mw": 2.6374879187,
+          "p_loss_pu": 0.0263748792,
+          "p_to_mw": 85.0,
+          "p_to_pu": 0.85,
+          "q_from_mvar": -8.3323858559,
+          "q_from_pu": -0.0833238586,
+          "q_to_mvar": -17.5146405298,
+          "q_to_pu": -0.1751464053,
+          "to_bus": 6
+        },
+        {
+          "branch_reactive_endpoint_sum_mvar": 4.1297653884,
+          "branch_reactive_endpoint_sum_pu": 0.0412976539,
+          "from_bus": 3,
+          "p_from_mw": 85.0,
+          "p_from_pu": 0.85,
+          "p_loss_mw": 0.0,
+          "p_loss_pu": 0.0,
+          "p_to_mw": -85.0,
+          "p_to_pu": -0.85,
+          "q_from_mvar": -13.3848751415,
+          "q_from_pu": -0.1338487514,
+          "q_to_mvar": 17.5146405298,
+          "q_to_pu": 0.1751464053,
+          "to_bus": 6
+        },
+        {
+          "branch_reactive_endpoint_sum_mvar": -6.6217980594,
+          "branch_reactive_endpoint_sum_pu": -0.0662179806,
+          "from_bus": 7,
+          "p_from_mw": -100.0,
+          "p_from_pu": -1.0,
+          "p_loss_mw": 0.9571540049,
+          "p_loss_pu": 0.00957154,
+          "p_to_mw": 100.9571540049,
+          "p_to_pu": 1.00957154,
+          "q_from_mvar": -35.0,
+          "q_from_pu": -0.35,
+          "q_to_mvar": 28.3782019406,
+          "q_to_pu": 0.2837820194,
+          "to_bus": 8
+        },
+        {
+          "branch_reactive_endpoint_sum_mvar": 16.4398631562,
+          "branch_reactive_endpoint_sum_pu": 0.1643986316,
+          "from_bus": 8,
+          "p_from_mw": -163.0,
+          "p_from_pu": -1.63,
+          "p_loss_mw": 0.0,
+          "p_loss_pu": 0.0,
+          "p_to_mw": 163.0,
+          "p_to_pu": 1.63,
+          "q_from_mvar": -16.2160699267,
+          "q_from_pu": -0.1621606993,
+          "q_to_mvar": 32.6559330829,
+          "q_to_pu": 0.3265593308,
+          "to_bus": 2
+        },
+        {
+          "branch_reactive_endpoint_sum_mvar": -24.4991105853,
+          "branch_reactive_endpoint_sum_pu": -0.2449911059,
+          "from_bus": 8,
+          "p_from_mw": 62.0428459951,
+          "p_from_pu": 0.62042846,
+          "p_loss_mw": 1.2112566559,
+          "p_loss_pu": 0.0121125666,
+          "p_to_mw": -60.8315893392,
+          "p_to_pu": -0.6083158934,
+          "q_from_mvar": -12.1621320139,
+          "q_from_pu": -0.1216213201,
+          "q_to_mvar": -12.3369785714,
+          "q_to_pu": -0.1233697857,
+          "to_bus": 9
+        },
+        {
+          "branch_reactive_endpoint_sum_mvar": -13.5136006583,
+          "branch_reactive_endpoint_sum_pu": -0.1351360066,
+          "from_bus": 9,
+          "p_from_mw": -64.1684106608,
+          "p_from_pu": -0.6416841066,
+          "p_loss_mw": 0.5065058622,
+          "p_loss_pu": 0.0050650586,
+          "p_to_mw": 64.674916523,
+          "p_to_pu": 0.6467491652,
+          "q_from_mvar": -37.6630214286,
+          "q_from_pu": -0.3766302143,
+          "q_to_mvar": 24.1494207703,
+          "q_to_pu": 0.2414942077,
+          "to_bus": 4
+        }
+      ],
+      "branch_reactive_endpoint_sum_mvar": -62.6164242649,
+      "branch_reactive_endpoint_sum_pu": -0.6261642426,
+      "contingency_id": "6-7",
+      "converged": true,
+      "from_bus": 6,
+      "generator_outputs": [
+        {
+          "bus_id": 1,
+          "bus_type": "slack",
+          "p_gen_mw": 72.353185287,
+          "p_gen_pu": 0.7235318529,
+          "q_gen_mvar": 33.1125177936,
+          "q_gen_pu": 0.3311251779
+        },
+        {
+          "bus_id": 2,
+          "bus_type": "pv",
+          "p_gen_mw": 163.0,
+          "p_gen_pu": 1.63,
+          "q_gen_mvar": 32.6559330829,
+          "q_gen_pu": 0.3265593308
+        },
+        {
+          "bus_id": 3,
+          "bus_type": "pv",
+          "p_gen_mw": 85.0,
+          "p_gen_pu": 0.85,
+          "q_gen_mvar": -13.3848751415,
+          "q_gen_pu": -0.1338487514
+        }
+      ],
+      "group": "transmission_loop",
+      "islanded_buses": [],
+      "iterations": 4,
+      "largest_abs_branch_end_mw": 163.0,
+      "largest_abs_voltage_delta_bus_id": 7,
+      "largest_abs_voltage_delta_pu": 0.037604441,
+      "max_mismatch_pu": 0.0,
+      "max_voltage_bus_id": 1,
+      "max_voltage_pu": 1.04,
+      "min_voltage_bus_id": 7,
+      "min_voltage_pu": 0.9782781426,
+      "notes": [],
+      "status": "solved",
+      "surviving_buses": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "to_bus": 7,
+      "total_real_loss_mw": 5.353185287,
+      "total_real_loss_pu": 0.0535318529,
+      "voltage_violations": [],
+      "voltages": [
+        {
+          "bus_id": 1,
+          "delta_from_base_pu": 0.0,
+          "v_base_pu": 1.04,
+          "v_post_pu": 1.04
+        },
+        {
+          "bus_id": 2,
+          "delta_from_base_pu": 0.0,
+          "v_base_pu": 1.025,
+          "v_post_pu": 1.025
+        },
+        {
+          "bus_id": 3,
+          "delta_from_base_pu": 0.0,
+          "v_base_pu": 1.025,
+          "v_post_pu": 1.025
+        },
+        {
+          "bus_id": 4,
+          "delta_from_base_pu": -0.0033420543,
+          "v_base_pu": 1.0257883928,
+          "v_post_pu": 1.0224463385
+        },
+        {
+          "bus_id": 5,
+          "delta_from_base_pu": -0.0039363558,
+          "v_base_pu": 1.012654324,
+          "v_post_pu": 1.0087179682
+        },
+        {
+          "bus_id": 6,
+          "delta_from_base_pu": 0.0014420578,
+          "v_base_pu": 1.032352949,
+          "v_post_pu": 1.0337950068
+        },
+        {
+          "bus_id": 7,
+          "delta_from_base_pu": -0.037604441,
+          "v_base_pu": 1.0158825836,
+          "v_post_pu": 0.9782781426
+        },
+        {
+          "bus_id": 8,
+          "delta_from_base_pu": -0.0157792744,
+          "v_base_pu": 1.0257693724,
+          "v_post_pu": 1.009990098
+        },
+        {
+          "bus_id": 9,
+          "delta_from_base_pu": -0.0059447764,
+          "v_base_pu": 0.995630858,
+          "v_post_pu": 0.9896860816
+        }
+      ]
+    },
+    {
+      "branch_count": 8,
+      "branch_flows": [
+        {
+          "branch_reactive_endpoint_sum_mvar": 4.4198343883,
+          "branch_reactive_endpoint_sum_pu": 0.0441983439,
+          "from_bus": 1,
+          "p_from_mw": 79.0928325585,
+          "p_from_pu": 0.7909283256,
+          "p_loss_mw": 0.0,
+          "p_loss_pu": 0.0,
+          "p_to_mw": -79.0928325585,
+          "p_to_pu": -0.7909283256,
+          "q_from_mvar": 45.2083027078,
+          "q_from_pu": 0.4520830271,
+          "q_to_mvar": -40.7884683195,
+          "q_to_pu": -0.4078846832,
+          "to_bus": 4
+        },
+        {
+          "branch_reactive_endpoint_sum_mvar": -5.5497750389,
+          "branch_reactive_endpoint_sum_pu": -0.0554977504,
+          "from_bus": 4,
+          "p_from_mw": 108.4423171489,
+          "p_from_pu": 1.0844231715,
+          "p_loss_mw": 1.9390516558,
+          "p_loss_pu": 0.0193905166,
+          "p_to_mw": -106.5032654931,
+          "p_to_pu": -1.0650326549,
+          "q_from_mvar": -4.6605805672,
+          "q_from_pu": -0.0466058057,
+          "q_to_mvar": -0.8891944717,
+          "q_to_pu": -0.0088919447,
+          "to_bus": 5
+        },
+        {
+          "branch_reactive_endpoint_sum_mvar": -35.5519384731,
+          "branch_reactive_endpoint_sum_pu": -0.3555193847,
+          "from_bus": 5,
+          "p_from_mw": 16.5032654933,
+          "p_from_pu": 0.1650326549,
+          "p_loss_mw": 0.155625124,
+          "p_loss_pu": 0.0015562512,
+          "p_to_mw": -16.3476403693,
+          "p_to_pu": -0.1634764037,
+          "q_from_mvar": -29.1108055283,
+          "q_from_pu": -0.2911080553,
+          "q_to_mvar": -6.4411329448,
+          "q_to_pu": -0.0644113294,
+          "to_bus": 6
+        },
+        {
+          "branch_reactive_endpoint_sum_mvar": 4.345580011,
+          "branch_reactive_endpoint_sum_pu": 0.0434558001,
+          "from_bus": 3,
+          "p_from_mw": 85.0,
+          "p_from_pu": 0.85,
+          "p_loss_mw": 0.0,
+          "p_loss_pu": 0.0,
+          "p_to_mw": -85.0,
+          "p_to_pu": -0.85,
+          "q_from_mvar": 23.792511766,
+          "q_from_pu": 0.2379251177,
+          "q_to_mvar": -19.446931755,
+          "q_to_pu": -0.1944693176,
+          "to_bus": 6
+        },
+        {
+          "branch_reactive_endpoint_sum_mvar": -9.1119353001,
+          "branch_reactive_endpoint_sum_pu": -0.091119353,
+          "from_bus": 6,
+          "p_from_mw": 101.3476403693,
+          "p_from_pu": 1.0134764037,
+          "p_loss_mw": 1.3476403694,
+          "p_loss_pu": 0.0134764037,
+          "p_to_mw": -100.0,
+          "p_to_pu": -1.0,
+          "q_from_mvar": 25.8880646998,
+          "q_from_pu": 0.258880647,
+          "q_to_mvar": -35.0,
+          "q_to_pu": -0.35,
+          "to_bus": 7
+        },
+        {
+          "branch_reactive_endpoint_sum_mvar": 15.9883033695,
+          "branch_reactive_endpoint_sum_pu": 0.1598830337,
+          "from_bus": 8,
+          "p_from_mw": -162.9999999999,
+          "p_from_pu": -1.63,
+          "p_loss_mw": 0.0,
+          "p_loss_pu": 0.0,
+          "p_to_mw": 162.9999999999,
+          "p_to_pu": 1.63,
+          "q_from_mvar": -1.5427537641,
+          "q_from_pu": -0.0154275376,
+          "q_to_mvar": 17.5310571336,
+          "q_to_pu": 0.1753105713,
+          "to_bus": 2
+        },
+        {
+          "branch_reactive_endpoint_sum_mvar": 11.2574726293,
+          "branch_reactive_endpoint_sum_pu": 0.1125747263,
+          "from_bus": 8,
+          "p_from_mw": 162.9999999999,
+          "p_from_pu": 1.63,
+          "p_loss_mw": 8.2789260304,
+          "p_loss_pu": 0.0827892603,
+          "p_to_mw": -154.7210739695,
+          "p_to_pu": -1.5472107397,
+          "q_from_mvar": 1.5427537643,
+          "q_from_pu": 0.0154275376,
+          "q_to_mvar": 9.714718865,
+          "q_to_pu": 0.0971471886,
+          "to_bus": 9
+        },
+        {
+          "branch_reactive_endpoint_sum_mvar": -14.2656699768,
+          "branch_reactive_endpoint_sum_pu": -0.1426566998,
+          "from_bus": 9,
+          "p_from_mw": 29.7210739705,
+          "p_from_pu": 0.2972107397,
+          "p_loss_mw": 0.3715893793,
+          "p_loss_pu": 0.0037158938,
+          "p_to_mw": -29.3494845912,
+          "p_to_pu": -0.2934948459,
+          "q_from_mvar": -59.7147188638,
+          "q_from_pu": -0.5971471886,
+          "q_to_mvar": 45.449048887,
+          "q_to_pu": 0.4544904889,
+          "to_bus": 4
+        }
+      ],
+      "branch_reactive_endpoint_sum_mvar": -28.4681283907,
+      "branch_reactive_endpoint_sum_pu": -0.2846812839,
+      "contingency_id": "7-8",
+      "converged": true,
+      "from_bus": 7,
+      "generator_outputs": [
+        {
+          "bus_id": 1,
+          "bus_type": "slack",
+          "p_gen_mw": 79.0928325585,
+          "p_gen_pu": 0.7909283256,
+          "q_gen_mvar": 45.2083027078,
+          "q_gen_pu": 0.4520830271
+        },
+        {
+          "bus_id": 2,
+          "bus_type": "pv",
+          "p_gen_mw": 162.9999999999,
+          "p_gen_pu": 1.63,
+          "q_gen_mvar": 17.5310571336,
+          "q_gen_pu": 0.1753105713
+        },
+        {
+          "bus_id": 3,
+          "bus_type": "pv",
+          "p_gen_mw": 85.0,
+          "p_gen_pu": 0.85,
+          "q_gen_mvar": 23.792511766,
+          "q_gen_pu": 0.2379251177
+        }
+      ],
+      "group": "transmission_loop",
+      "islanded_buses": [],
+      "iterations": 4,
+      "largest_abs_branch_end_mw": 162.9999999999,
+      "largest_abs_voltage_delta_bus_id": 7,
+      "largest_abs_voltage_delta_pu": 0.0468404339,
+      "max_mismatch_pu": 0.0,
+      "max_voltage_bus_id": 1,
+      "max_voltage_pu": 1.04,
+      "min_voltage_bus_id": 7,
+      "min_voltage_pu": 0.9690421497,
+      "notes": [],
+      "status": "solved",
+      "surviving_buses": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "to_bus": 8,
+      "total_real_loss_mw": 12.0928325588,
+      "total_real_loss_pu": 0.1209283256,
+      "voltage_violations": [],
+      "voltages": [
+        {
+          "bus_id": 1,
+          "delta_from_base_pu": 0.0,
+          "v_base_pu": 1.04,
+          "v_post_pu": 1.04
+        },
+        {
+          "bus_id": 2,
+          "delta_from_base_pu": 0.0,
+          "v_base_pu": 1.025,
+          "v_post_pu": 1.025
+        },
+        {
+          "bus_id": 3,
+          "delta_from_base_pu": 0.0,
+          "v_base_pu": 1.025,
+          "v_post_pu": 1.025
+        },
+        {
+          "bus_id": 4,
+          "delta_from_base_pu": -0.00988197,
+          "v_base_pu": 1.0257883928,
+          "v_post_pu": 1.0159064228
+        },
+        {
+          "bus_id": 5,
+          "delta_from_base_pu": -0.0132781857,
+          "v_base_pu": 1.012654324,
+          "v_post_pu": 0.9993761383
+        },
+        {
+          "bus_id": 6,
+          "delta_from_base_pu": -0.0197885382,
+          "v_base_pu": 1.032352949,
+          "v_post_pu": 1.0125644108
+        },
+        {
+          "bus_id": 7,
+          "delta_from_base_pu": -0.0468404339,
+          "v_base_pu": 1.0158825836,
+          "v_post_pu": 0.9690421497
+        },
+        {
+          "bus_id": 8,
+          "delta_from_base_pu": -0.0066011487,
+          "v_base_pu": 1.0257693724,
+          "v_post_pu": 1.0191682237
+        },
+        {
+          "bus_id": 9,
+          "delta_from_base_pu": -0.0220012772,
+          "v_base_pu": 0.995630858,
+          "v_post_pu": 0.9736295808
+        }
+      ]
+    },
+    {
+      "branch_count": 8,
+      "branch_flows": [
+        {
+          "branch_reactive_endpoint_sum_mvar": 30.292212698,
+          "branch_reactive_endpoint_sum_pu": 0.302922127,
+          "from_bus": 1,
+          "p_from_mw": 234.4346955735,
+          "p_from_pu": 2.3443469557,
+          "p_loss_mw": 0.0,
+          "p_loss_pu": 0.0,
+          "p_to_mw": -234.4346955735,
+          "p_to_pu": -2.3443469557,
+          "q_from_mvar": 43.8453800928,
+          "q_from_pu": 0.4384538009,
+          "q_to_mvar": -13.5531673947,
+          "q_to_pu": -0.1355316739,
+          "to_bus": 4
+        },
+        {
+          "branch_reactive_endpoint_sum_mvar": -9.216569101,
+          "branch_reactive_endpoint_sum_pu": -0.092165691,
+          "from_bus": 4,
+          "p_from_mw": 90.1712793044,
+          "p_from_pu": 0.901712793,
+          "p_loss_mw": 1.3187417037,
+          "p_loss_pu": 0.013187417,
+          "p_to_mw": -88.8525376007,
+          "p_to_pu": -0.888525376,
+          "q_from_mvar": -6.5595211094,
+          "q_from_pu": -0.0655952111,
+          "q_to_mvar": -2.6570479916,
+          "q_to_pu": -0.0265704799,
+          "to_bus": 5
+        },
+        {
+          "branch_reactive_endpoint_sum_mvar": -37.002635889,
+          "branch_reactive_endpoint_sum_pu": -0.3700263589,
+          "from_bus": 5,
+          "p_from_mw": -1.1474623993,
+          "p_from_pu": -0.011474624,
+          "p_loss_mw": 0.0318286729,
+          "p_loss_pu": 0.0003182867,
+          "p_to_mw": 1.1792910722,
+          "p_to_pu": 0.0117929107,
+          "q_from_mvar": -27.3429520084,
+          "q_from_pu": -0.2734295201,
+          "q_to_mvar": -9.6596838807,
+          "q_to_pu": -0.0965968388,
+          "to_bus": 6
+        },
+        {
+          "branch_reactive_endpoint_sum_mvar": 4.0299225447,
+          "branch_reactive_endpoint_sum_pu": 0.0402992254,
+          "from_bus": 3,
+          "p_from_mw": 85.0,
+          "p_from_pu": 0.85,
+          "p_loss_mw": 0.0,
+          "p_loss_pu": 0.0,
+          "p_to_mw": -85.0,
+          "p_to_pu": -0.85,
+          "q_from_mvar": -0.3861368417,
+          "q_from_pu": -0.0038613684,
+          "q_to_mvar": 4.4160593865,
+          "q_to_pu": 0.0441605939,
+          "to_bus": 6
+        },
+        {
+          "branch_reactive_endpoint_sum_mvar": -14.5649312778,
+          "branch_reactive_endpoint_sum_pu": -0.1456493128,
+          "from_bus": 6,
+          "p_from_mw": 83.8207089279,
+          "p_from_pu": 0.8382070893,
+          "p_loss_mw": 0.8235073725,
+          "p_loss_pu": 0.0082350737,
+          "p_to_mw": -82.9972015553,
+          "p_to_pu": -0.8299720156,
+          "q_from_mvar": 5.2436244942,
+          "q_from_pu": 0.0524362449,
+          "q_to_mvar": -19.808555772,
+          "q_to_pu": -0.1980855577,
+          "to_bus": 7
+        },
+        {
+          "branch_reactive_endpoint_sum_mvar": -14.873653756,
+          "branch_reactive_endpoint_sum_pu": -0.1487365376,
+          "from_bus": 7,
+          "p_from_mw": -17.0027984446,
+          "p_from_pu": -0.1700279844,
+          "p_loss_mw": 0.0293597902,
+          "p_loss_pu": 0.0002935979,
+          "p_to_mw": 17.0321582349,
+          "p_to_pu": 0.1703215823,
+          "q_from_mvar": -15.191444228,
+          "q_from_pu": -0.1519144423,
+          "q_to_mvar": 0.3177904719,
+          "q_to_pu": 0.0031779047,
+          "to_bus": 8
+        },
+        {
+          "branch_reactive_endpoint_sum_mvar": -29.8794870697,
+          "branch_reactive_endpoint_sum_pu": -0.2987948707,
+          "from_bus": 8,
+          "p_from_mw": -17.0321582348,
+          "p_from_pu": -0.1703215823,
+          "p_loss_mw": 0.1643086551,
+          "p_loss_pu": 0.0016430866,
+          "p_to_mw": 17.1964668899,
+          "p_to_pu": 0.1719646689,
+          "q_from_mvar": -0.3177904719,
+          "q_from_pu": -0.0031779047,
+          "q_to_mvar": -29.5616965978,
+          "q_to_pu": -0.295616966,
+          "to_bus": 9
+        },
+        {
+          "branch_reactive_endpoint_sum_mvar": -0.3256148978,
+          "branch_reactive_endpoint_sum_pu": -0.003256149,
+          "from_bus": 9,
+          "p_from_mw": -142.1964668899,
+          "p_from_pu": -1.4219646689,
+          "p_loss_mw": 2.0669493792,
+          "p_loss_pu": 0.0206694938,
+          "p_to_mw": 144.2634162691,
+          "p_to_pu": 1.4426341627,
+          "q_from_mvar": -20.4383034021,
+          "q_from_pu": -0.204383034,
+          "q_to_mvar": 20.1126885042,
+          "q_to_pu": 0.201126885,
+          "to_bus": 4
+        }
+      ],
+      "branch_reactive_endpoint_sum_mvar": -71.5407567486,
+      "branch_reactive_endpoint_sum_pu": -0.7154075675,
+      "contingency_id": "8-2",
+      "converged": true,
+      "from_bus": 8,
+      "generator_outputs": [
+        {
+          "bus_id": 1,
+          "bus_type": "slack",
+          "p_gen_mw": 234.4346955735,
+          "p_gen_pu": 2.3443469557,
+          "q_gen_mvar": 43.8453800928,
+          "q_gen_pu": 0.4384538009
+        },
+        {
+          "bus_id": 3,
+          "bus_type": "pv",
+          "p_gen_mw": 85.0,
+          "p_gen_pu": 0.85,
+          "q_gen_mvar": -0.3861368417,
+          "q_gen_pu": -0.0038613684
+        }
+      ],
+      "group": "generator_connection",
+      "islanded_buses": [
+        2
+      ],
+      "iterations": 4,
+      "largest_abs_branch_end_mw": 234.4346955735,
+      "largest_abs_voltage_delta_bus_id": 8,
+      "largest_abs_voltage_delta_pu": 0.0148339461,
+      "max_mismatch_pu": 0.0,
+      "max_voltage_bus_id": 1,
+      "max_voltage_pu": 1.04,
+      "min_voltage_bus_id": 9,
+      "min_voltage_pu": 0.9924456923,
+      "notes": [
+        "bus 2 islanded; 1.63 p.u. / 163 MW of generation absorbed by slack"
+      ],
+      "status": "partial_island",
+      "surviving_buses": [
+        1,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "to_bus": 2,
+      "total_real_loss_mw": 4.4346955736,
+      "total_real_loss_pu": 0.0443469557,
+      "voltage_violations": [],
+      "voltages": [
+        {
+          "bus_id": 1,
+          "delta_from_base_pu": 0.0,
+          "v_base_pu": 1.04,
+          "v_post_pu": 1.04
+        },
+        {
+          "bus_id": 3,
+          "delta_from_base_pu": 0.0,
+          "v_base_pu": 1.025,
+          "v_post_pu": 1.025
+        },
+        {
+          "bus_id": 4,
+          "delta_from_base_pu": -0.0018067345,
+          "v_base_pu": 1.0257883928,
+          "v_post_pu": 1.0239816584
+        },
+        {
+          "bus_id": 5,
+          "delta_from_base_pu": -0.0019624154,
+          "v_base_pu": 1.012654324,
+          "v_post_pu": 1.0106919086
+        },
+        {
+          "bus_id": 6,
+          "delta_from_base_pu": -0.0059811416,
+          "v_base_pu": 1.032352949,
+          "v_post_pu": 1.0263718074
+        },
+        {
+          "bus_id": 7,
+          "delta_from_base_pu": -0.0119627694,
+          "v_base_pu": 1.0158825836,
+          "v_post_pu": 1.0039198142
+        },
+        {
+          "bus_id": 8,
+          "delta_from_base_pu": -0.0148339461,
+          "v_base_pu": 1.0257693724,
+          "v_post_pu": 1.0109354263
+        },
+        {
+          "bus_id": 9,
+          "delta_from_base_pu": -0.0031851658,
+          "v_base_pu": 0.995630858,
+          "v_post_pu": 0.9924456923
+        }
+      ]
+    },
+    {
+      "branch_count": 8,
+      "branch_flows": [
+        {
+          "branch_reactive_endpoint_sum_mvar": 7.0048423378,
+          "branch_reactive_endpoint_sum_pu": 0.0700484234,
+          "from_bus": 1,
+          "p_from_mw": 80.2083229395,
+          "p_from_pu": 0.8020832294,
+          "p_loss_mw": 0.0,
+          "p_loss_pu": 0.0,
+          "p_to_mw": -80.2083229395,
+          "p_to_pu": -0.8020832294,
+          "q_from_mvar": 81.9765955016,
+          "q_from_pu": 0.819765955,
+          "q_to_mvar": -74.9717531638,
+          "q_to_pu": -0.7497175316,
+          "to_bus": 4
+        },
+        {
+          "branch_reactive_endpoint_sum_mvar": -12.3299049223,
+          "branch_reactive_endpoint_sum_pu": -0.1232990492,
+          "from_bus": 4,
+          "p_from_mw": -46.7704636671,
+          "p_from_pu": -0.4677046367,
+          "p_loss_mw": 0.5557499582,
+          "p_loss_pu": 0.0055574996,
+          "p_to_mw": 47.3262136252,
+          "p_to_pu": 0.4732621363,
+          "q_from_mvar": 24.6174274459,
+          "q_from_pu": 0.2461742745,
+          "q_to_mvar": -36.9473323682,
+          "q_to_pu": -0.3694733237,
+          "to_bus": 5
+        },
+        {
+          "branch_reactive_endpoint_sum_mvar": -0.827684694,
+          "branch_reactive_endpoint_sum_pu": -0.0082768469,
+          "from_bus": 5,
+          "p_from_mw": -137.3262136237,
+          "p_from_pu": -1.3732621362,
+          "p_loss_mw": 7.9753633056,
+          "p_loss_pu": 0.0797536331,
+          "p_to_mw": 145.3015769293,
+          "p_to_pu": 1.4530157693,
+          "q_from_mvar": 6.9473323702,
+          "q_from_pu": 0.0694733237,
+          "q_to_mvar": -7.7750170642,
+          "q_to_pu": -0.0777501706,
+          "to_bus": 6
+        },
+        {
+          "branch_reactive_endpoint_sum_mvar": 4.1201300447,
+          "branch_reactive_endpoint_sum_pu": 0.0412013004,
+          "from_bus": 3,
+          "p_from_mw": 85.0,
+          "p_from_pu": 0.85,
+          "p_loss_mw": 0.0,
+          "p_loss_pu": 0.0,
+          "p_to_mw": -85.0,
+          "p_to_pu": -0.85,
+          "q_from_mvar": 12.723203672,
+          "q_from_pu": 0.1272320367,
+          "q_to_mvar": -8.6030736273,
+          "q_to_pu": -0.0860307363,
+          "to_bus": 6
+        },
+        {
+          "branch_reactive_endpoint_sum_mvar": -17.0681363472,
+          "branch_reactive_endpoint_sum_pu": -0.1706813635,
+          "from_bus": 6,
+          "p_from_mw": -60.3015769288,
+          "p_from_pu": -0.6030157693,
+          "p_loss_mw": 0.5017976636,
+          "p_loss_pu": 0.0050179766,
+          "p_to_mw": 60.8033745924,
+          "p_to_pu": 0.6080337459,
+          "q_from_mvar": 16.3780906918,
+          "q_from_pu": 0.1637809069,
+          "q_to_mvar": -33.4462270391,
+          "q_to_pu": -0.3344622704,
+          "to_bus": 7
+        },
+        {
+          "branch_reactive_endpoint_sum_mvar": 3.4364302699,
+          "branch_reactive_endpoint_sum_pu": 0.0343643027,
+          "from_bus": 7,
+          "p_from_mw": -160.8033745923,
+          "p_from_pu": -1.6080337459,
+          "p_loss_mw": 2.1966254078,
+          "p_loss_pu": 0.0219662541,
+          "p_to_mw": 163.0,
+          "p_to_pu": 1.63,
+          "q_from_mvar": -1.5537729608,
+          "q_from_pu": -0.0155377296,
+          "q_to_mvar": 4.9902032307,
+          "q_to_pu": 0.0499020323,
+          "to_bus": 8
+        },
+        {
+          "branch_reactive_endpoint_sum_mvar": 16.0693057212,
+          "branch_reactive_endpoint_sum_pu": 0.1606930572,
+          "from_bus": 8,
+          "p_from_mw": -163.0,
+          "p_from_pu": -1.63,
+          "p_loss_mw": 0.0,
+          "p_loss_pu": 0.0,
+          "p_to_mw": 163.0,
+          "p_to_pu": 1.63,
+          "q_from_mvar": -4.9902032307,
+          "q_from_pu": -0.0499020323,
+          "q_to_mvar": 21.0595089518,
+          "q_to_pu": 0.2105950895,
+          "to_bus": 2
+        },
+        {
+          "branch_reactive_endpoint_sum_mvar": 0.3543257211,
+          "branch_reactive_endpoint_sum_pu": 0.0035432572,
+          "from_bus": 9,
+          "p_from_mw": -124.9999999963,
+          "p_from_pu": -1.25,
+          "p_loss_mw": 1.9787866056,
+          "p_loss_pu": 0.0197878661,
+          "p_to_mw": 126.9787866019,
+          "p_to_pu": 1.269787866,
+          "q_from_mvar": -49.9999999987,
+          "q_from_pu": -0.5,
+          "q_to_mvar": 50.3543257197,
+          "q_to_pu": 0.5035432572,
+          "to_bus": 4
+        }
+      ],
+      "branch_reactive_endpoint_sum_mvar": 0.7593081311,
+      "branch_reactive_endpoint_sum_pu": 0.0075930813,
+      "contingency_id": "8-9",
+      "converged": true,
+      "from_bus": 8,
+      "generator_outputs": [
+        {
+          "bus_id": 1,
+          "bus_type": "slack",
+          "p_gen_mw": 80.2083229395,
+          "p_gen_pu": 0.8020832294,
+          "q_gen_mvar": 81.9765955016,
+          "q_gen_pu": 0.819765955
+        },
+        {
+          "bus_id": 2,
+          "bus_type": "pv",
+          "p_gen_mw": 163.0,
+          "p_gen_pu": 1.63,
+          "q_gen_mvar": 21.0595089518,
+          "q_gen_pu": 0.2105950895
+        },
+        {
+          "bus_id": 3,
+          "bus_type": "pv",
+          "p_gen_mw": 85.0,
+          "p_gen_pu": 0.85,
+          "q_gen_mvar": 12.723203672,
+          "q_gen_pu": 0.1272320367
+        }
+      ],
+      "group": "transmission_loop",
+      "islanded_buses": [],
+      "iterations": 4,
+      "largest_abs_branch_end_mw": 163.0,
+      "largest_abs_voltage_delta_bus_id": 9,
+      "largest_abs_voltage_delta_pu": 0.0576191664,
+      "max_mismatch_pu": 0.0,
+      "max_voltage_bus_id": 1,
+      "max_voltage_pu": 1.04,
+      "min_voltage_bus_id": 9,
+      "min_voltage_pu": 0.9380116916,
+      "notes": [],
+      "status": "solved",
+      "surviving_buses": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "to_bus": 9,
+      "total_real_loss_mw": 13.2083229407,
+      "total_real_loss_pu": 0.1320832294,
+      "voltage_violations": [
+        {
+          "bus_id": 9,
+          "kind": "low",
+          "limit_pu": 0.95,
+          "v_post_pu": 0.9380116916
+        }
+      ],
+      "voltages": [
+        {
+          "bus_id": 1,
+          "delta_from_base_pu": 0.0,
+          "v_base_pu": 1.04,
+          "v_post_pu": 1.04
+        },
+        {
+          "bus_id": 2,
+          "delta_from_base_pu": 0.0,
+          "v_base_pu": 1.025,
+          "v_post_pu": 1.025
+        },
+        {
+          "bus_id": 3,
+          "delta_from_base_pu": 0.0,
+          "v_base_pu": 1.025,
+          "v_post_pu": 1.025
+        },
+        {
+          "bus_id": 4,
+          "delta_from_base_pu": -0.0301992451,
+          "v_base_pu": 1.0257883928,
+          "v_post_pu": 0.9955891478
+        },
+        {
+          "bus_id": 5,
+          "delta_from_base_pu": -0.0378430345,
+          "v_base_pu": 1.012654324,
+          "v_post_pu": 0.9748112896
+        },
+        {
+          "bus_id": 6,
+          "delta_from_base_pu": -0.0134673806,
+          "v_base_pu": 1.032352949,
+          "v_post_pu": 1.0188855684
+        },
+        {
+          "bus_id": 7,
+          "delta_from_base_pu": -0.0149154816,
+          "v_base_pu": 1.0158825836,
+          "v_post_pu": 1.0009671021
+        },
+        {
+          "bus_id": 8,
+          "delta_from_base_pu": -0.0087423669,
+          "v_base_pu": 1.0257693724,
+          "v_post_pu": 1.0170270055
+        },
+        {
+          "bus_id": 9,
+          "delta_from_base_pu": -0.0576191664,
+          "v_base_pu": 0.995630858,
+          "v_post_pu": 0.9380116916
+        }
+      ]
+    },
+    {
+      "branch_count": 8,
+      "branch_flows": [
+        {
+          "branch_reactive_endpoint_sum_mvar": 3.1297130982,
+          "branch_reactive_endpoint_sum_pu": 0.031297131,
+          "from_bus": 1,
+          "p_from_mw": 76.5669323342,
+          "p_from_pu": 0.7656693233,
+          "p_loss_mw": 0.0,
+          "p_loss_pu": 0.0,
+          "p_to_mw": -76.5669323342,
+          "p_to_pu": -0.7656693233,
+          "q_from_mvar": 3.7961269028,
+          "q_from_pu": 0.037961269,
+          "q_to_mvar": -0.6664138046,
+          "q_to_pu": -0.006664138,
+          "to_bus": 4
+        },
+        {
+          "branch_reactive_endpoint_sum_mvar": -11.6770332898,
+          "branch_reactive_endpoint_sum_pu": -0.1167703329,
+          "from_bus": 4,
+          "p_from_mw": 76.5669323342,
+          "p_from_pu": 0.7656693233,
+          "p_loss_mw": 0.9369382139,
+          "p_loss_pu": 0.0093693821,
+          "p_to_mw": -75.6299941203,
+          "p_to_pu": -0.7562999412,
+          "q_from_mvar": 0.6664138046,
+          "q_from_pu": 0.006664138,
+          "q_to_mvar": -12.3434470944,
+          "q_to_pu": -0.1234344709,
+          "to_bus": 5
+        },
+        {
+          "branch_reactive_endpoint_sum_mvar": -37.0778770981,
+          "branch_reactive_endpoint_sum_pu": -0.370778771,
+          "from_bus": 5,
+          "p_from_mw": -14.3700058797,
+          "p_from_pu": -0.1437000588,
+          "p_loss_mw": 0.0777254156,
+          "p_loss_pu": 0.0007772542,
+          "p_to_mw": 14.4477312953,
+          "p_to_pu": 0.144477313,
+          "q_from_mvar": -17.6565529056,
+          "q_from_pu": -0.1765655291,
+          "q_to_mvar": -19.4213241925,
+          "q_to_pu": -0.1942132419,
+          "to_bus": 6
+        },
+        {
+          "branch_reactive_endpoint_sum_mvar": 4.0350500136,
+          "branch_reactive_endpoint_sum_pu": 0.0403505001,
+          "from_bus": 3,
+          "p_from_mw": 85.0,
+          "p_from_pu": 0.85,
+          "p_loss_mw": 0.0,
+          "p_loss_pu": 0.0,
+          "p_to_mw": -85.0,
+          "p_to_pu": -0.85,
+          "q_from_mvar": 3.0564709209,
+          "q_from_pu": 0.0305647092,
+          "q_to_mvar": 0.9785790927,
+          "q_to_pu": 0.0097857909,
+          "to_bus": 6
+        },
+        {
+          "branch_reactive_endpoint_sum_mvar": -15.5855331642,
+          "branch_reactive_endpoint_sum_pu": -0.1558553316,
+          "from_bus": 6,
+          "p_from_mw": 70.5522687047,
+          "p_from_pu": 0.705522687,
+          "p_loss_mw": 0.6625256401,
+          "p_loss_pu": 0.0066252564,
+          "p_to_mw": -69.8897430646,
+          "p_to_pu": -0.6988974306,
+          "q_from_mvar": 18.4427450998,
+          "q_from_pu": 0.184427451,
+          "q_to_mvar": -34.028278264,
+          "q_to_pu": -0.3402827826,
+          "to_bus": 7
+        },
+        {
+          "branch_reactive_endpoint_sum_mvar": -13.866007475,
+          "branch_reactive_endpoint_sum_pu": -0.1386600748,
+          "from_bus": 7,
+          "p_from_mw": -30.1102569354,
+          "p_from_pu": -0.3011025694,
+          "p_loss_mw": 0.082181553,
+          "p_loss_pu": 0.0008218155,
+          "p_to_mw": 30.1924384883,
+          "p_to_pu": 0.3019243849,
+          "q_from_mvar": -0.971721736,
+          "q_from_pu": -0.0097172174,
+          "q_to_mvar": -12.894285739,
+          "q_to_pu": -0.1289428574,
+          "to_bus": 8
+        },
+        {
+          "branch_reactive_endpoint_sum_mvar": 18.6677786965,
+          "branch_reactive_endpoint_sum_pu": 0.186677787,
+          "from_bus": 8,
+          "p_from_mw": -163.0,
+          "p_from_pu": -1.63,
+          "p_loss_mw": 0.0,
+          "p_loss_pu": 0.0,
+          "p_to_mw": 163.0,
+          "p_to_pu": 1.63,
+          "q_from_mvar": -50.6974574723,
+          "q_from_pu": -0.5069745747,
+          "q_to_mvar": 69.3652361688,
+          "q_to_pu": 0.6936523617,
+          "to_bus": 2
+        },
+        {
+          "branch_reactive_endpoint_sum_mvar": 13.5917432113,
+          "branch_reactive_endpoint_sum_pu": 0.1359174321,
+          "from_bus": 8,
+          "p_from_mw": 132.8075615117,
+          "p_from_pu": 1.3280756151,
+          "p_loss_mw": 7.8075615117,
+          "p_loss_pu": 0.0780756151,
+          "p_to_mw": -125.0,
+          "p_to_pu": -1.25,
+          "q_from_mvar": 63.5917432113,
+          "q_from_pu": 0.6359174321,
+          "q_to_mvar": -50.0,
+          "q_to_pu": -0.5,
+          "to_bus": 9
+        }
+      ],
+      "branch_reactive_endpoint_sum_mvar": -38.7821660076,
+      "branch_reactive_endpoint_sum_pu": -0.3878216601,
+      "contingency_id": "9-4",
+      "converged": true,
+      "from_bus": 9,
+      "generator_outputs": [
+        {
+          "bus_id": 1,
+          "bus_type": "slack",
+          "p_gen_mw": 76.5669323342,
+          "p_gen_pu": 0.7656693233,
+          "q_gen_mvar": 3.7961269028,
+          "q_gen_pu": 0.037961269
+        },
+        {
+          "bus_id": 2,
+          "bus_type": "pv",
+          "p_gen_mw": 163.0,
+          "p_gen_pu": 1.63,
+          "q_gen_mvar": 69.3652361688,
+          "q_gen_pu": 0.6936523617
+        },
+        {
+          "bus_id": 3,
+          "bus_type": "pv",
+          "p_gen_mw": 85.0,
+          "p_gen_pu": 0.85,
+          "q_gen_mvar": 3.0564709209,
+          "q_gen_pu": 0.0305647092
+        }
+      ],
+      "group": "transmission_loop",
+      "islanded_buses": [],
+      "iterations": 5,
+      "largest_abs_branch_end_mw": 163.0,
+      "largest_abs_voltage_delta_bus_id": 9,
+      "largest_abs_voltage_delta_pu": 0.1568803225,
+      "max_mismatch_pu": 0.0,
+      "max_voltage_bus_id": 1,
+      "max_voltage_pu": 1.04,
+      "min_voltage_bus_id": 9,
+      "min_voltage_pu": 0.8387505356,
+      "notes": [],
+      "status": "solved",
+      "surviving_buses": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "to_bus": 4,
+      "total_real_loss_mw": 9.5669323342,
+      "total_real_loss_pu": 0.0956693233,
+      "voltage_violations": [
+        {
+          "bus_id": 9,
+          "kind": "low",
+          "limit_pu": 0.95,
+          "v_post_pu": 0.8387505356
+        }
+      ],
+      "voltages": [
+        {
+          "bus_id": 1,
+          "delta_from_base_pu": 0.0,
+          "v_base_pu": 1.04,
+          "v_post_pu": 1.04
+        },
+        {
+          "bus_id": 2,
+          "delta_from_base_pu": 0.0,
+          "v_base_pu": 1.025,
+          "v_post_pu": 1.025
+        },
+        {
+          "bus_id": 3,
+          "delta_from_base_pu": 0.0,
+          "v_base_pu": 1.025,
+          "v_post_pu": 1.025
+        },
+        {
+          "bus_id": 4,
+          "delta_from_base_pu": 0.0129750916,
+          "v_base_pu": 1.0257883928,
+          "v_post_pu": 1.0387634844
+        },
+        {
+          "bus_id": 5,
+          "delta_from_base_pu": 0.0075956325,
+          "v_base_pu": 1.012654324,
+          "v_post_pu": 1.0202499565
+        },
+        {
+          "bus_id": 6,
+          "delta_from_base_pu": -0.0079470942,
+          "v_base_pu": 1.032352949,
+          "v_post_pu": 1.0244058548
+        },
+        {
+          "bus_id": 7,
+          "delta_from_base_pu": -0.0264064672,
+          "v_base_pu": 1.0158825836,
+          "v_post_pu": 0.9894761164
+        },
+        {
+          "bus_id": 8,
+          "delta_from_base_pu": -0.0380518943,
+          "v_base_pu": 1.0257693724,
+          "v_post_pu": 0.9877174781
+        },
+        {
+          "bus_id": 9,
+          "delta_from_base_pu": -0.1568803225,
+          "v_base_pu": 0.995630858,
+          "v_post_pu": 0.8387505356
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "base_mva": 100.0,
+    "branch_reactive_endpoint_sum": "Sum over branches of q_from + q_to; includes line charging as a negative contribution and is not colloquial reactive losses.",
+    "caveats": [
+      "Branch thermal ratings are absent from the fixture; overload checks are unavailable.",
+      "Generator reactive limits are absent from the fixture; Q-limit enforcement is not performed."
+    ],
+    "power_units": "p.u. values are on base_mva; MW and MVAr values are converted using base_mva.",
+    "q_gen_sanity_limit_pu": 2.0,
+    "solver_tolerance": 1e-08,
+    "source_case": "case9",
+    "voltage_limits": {
+      "v_max": 1.05,
+      "v_min": 0.95
+    }
+  }
+}

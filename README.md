@@ -8,6 +8,7 @@ Minimal AC Newton-Raphson power flow solver in Python. The implementation is int
 - Slack, PV, and PQ bus handling is implemented.
 - Newton-Raphson solves polar AC power flow with an analytic Jacobian.
 - Branch flows, losses, solved bus injections, and solved generation are computed.
+- IEEE 9-bus AC N-1 branch-outage analysis is implemented with deterministic JSON output.
 - Toy/system tests pass.
 - IEEE MATPOWER fixture tests validate `case9`, `case14`, `case30`, and the supplemental `soln9_pf` 9-bus fixture.
 
@@ -33,7 +34,18 @@ Then generate fixtures:
 
 ```bash
 octave --quiet scripts/generate_matpower_fixtures.m
+octave --quiet scripts/generate_case9_n1_matpower_fixture.m
 ```
+
+## IEEE 9-Bus N-1 Analysis
+
+```bash
+./.venv/bin/python scripts/run_case9_n1.py
+```
+
+The script writes `data/case9_n1_results.json` by default. The accompanying
+note is in `docs/ieee9_n1_analysis_note.tex` and
+`docs/ieee9_n1_analysis_note.pdf`.
 
 ## Tests
 
@@ -47,7 +59,7 @@ Without generated MATPOWER fixtures, the IEEE tests are skipped. With fixtures p
 
 - No reactive power limits or PV-to-PQ conversion.
 - No DC power flow.
-- No OPF or contingency analysis.
+- No OPF or economic redispatch.
 - No sparse matrix path.
 - Out-of-service branches are rejected instead of handled.
-- The test suite is the only interface; there is no CLI or plotting layer.
+- The only CLI is the case9 N-1 analysis script; there is no general case-runner CLI.

@@ -1,0 +1,184 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[hidelinks]{hyperref}
+
+\title{IEEE 9-Bus AC N-1 Branch-Outage Analysis}
+\author{Load Flow Lite}
+\date{}
+
+\newcommand{\pu}{\mathrm{p.u.}}
+\newcommand{\MW}{\mathrm{MW}}
+\newcommand{\MVAr}{\mathrm{MVAr}}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+This note documents an AC N-1 branch-outage study for the IEEE 9-bus case
+in \path{data/case9.json}. Each branch is removed one at a time, the
+remaining AC power-flow problem is classified topologically, and solvable
+post-contingency cases are solved with the Newton--Raphson solver in this
+repository. The checked-in JSON report is
+\path{data/case9_n1_results.json}.
+\end{abstract}
+
+\section{Scope}
+
+N-1 analysis asks whether the system remains acceptable after the loss of
+one component. Here the components are the nine branch records in the
+IEEE 9-bus fixture. The study is deliberately narrow:
+
+\begin{itemize}
+  \item AC power flow is solved for connected post-contingency networks and
+  for generator-islanding cases whose surviving component still contains
+  the original slack bus and all load.
+  \item No optimal power flow, economic redispatch, dynamic stability,
+  transient stability, protection action, or load shedding is modeled.
+  \item Branch thermal ratings and generator reactive limits are absent
+  from the fixtures. The report therefore cannot certify thermal-loading
+  or reactive-limit compliance.
+  \item PV-to-PQ conversion is not performed. Solved generator reactive
+  outputs are reported as diagnostics only.
+\end{itemize}
+
+The voltage screening band is $0.95 \le |V| \le 1.05~\pu$. All power-flow
+solver quantities are on the 100 MVA base unless explicitly shown in MW or
+MVAr.
+
+\section{Topology and Contingencies}
+
+The branches split into the six-branch transmission loop and three radial
+generator-connection branches shown in Table~\ref{tab:classification}. The
+stored branch orientation is used as the branch identifier.
+
+\begin{table}[htbp]
+\centering
+\caption{Branch classification used for the case9 N-1 study.}
+\label{tab:classification}
+\begin{tabular}{@{}ll@{}}
+\toprule
+Group & Branches \\
+\midrule
+Transmission loop & 4--5, 5--6, 6--7, 7--8, 8--9, 9--4 \\
+Generator connection & 1--4, 3--6, 8--2 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Removing branch 1--4 isolates the slack bus. The remaining load component
+has no angle reference, so the ordinary AC power-flow problem is not
+formulated. Removing branch 3--6 or 8--2 isolates a single PV generator
+bus. In this implementation the surviving slack-containing component is
+solved, with the missing real generation absorbed by the original slack
+bus. That is a modeling choice for this small study, not a general
+graph-theoretic requirement.
+
+\section{Base Case}
+
+The base case converges in four Newton iterations. Its solved voltage range
+is $0.9956~\pu$ at bus 9 to $1.0400~\pu$ at bus 1. The real-power loss is
+$4.641~\MW$. The branch reactive endpoint sum,
+\[
+  \sum_{\ell} (Q_{\ell,\mathrm{from}} + Q_{\ell,\mathrm{to}}),
+\]
+is $-92.160~\MVAr$. This quantity includes the effect of line charging and
+should not be read as colloquial reactive losses.
+
+\section{Solved Contingencies}
+
+Table~\ref{tab:solved} summarizes every solved connected or partial-island
+case. The largest branch-end flow column is the largest absolute real-power
+flow at either endpoint of any surviving branch.
+
+\begin{table}[htbp]
+\centering
+\caption{Solved N-1 results.}
+\label{tab:solved}
+\small
+\begin{tabular}{@{}lcrrrrr@{}}
+\toprule
+Outage & Status & Min $|V|$ & Bus & Loss & $Q_f+Q_t$ & Max $|P|$ \\
+ & & p.u. & & MW & MVAr & MW \\
+\midrule
+4--5 & solved & 0.9418 & 5 & 6.136 & -63.274 & 163.000 \\
+5--6 & solved & 0.9639 & 5 & 9.491 & -21.579 & 163.000 \\
+3--6 & partial island & 1.0028 & 9 & 3.629 & -88.881 & 163.000 \\
+6--7 & solved & 0.9783 & 7 & 5.353 & -62.616 & 163.000 \\
+7--8 & solved & 0.9690 & 7 & 12.093 & -28.468 & 163.000 \\
+8--2 & partial island & 0.9924 & 9 & 4.435 & -71.541 & 234.435 \\
+8--9 & solved & 0.9380 & 9 & 13.208 & 0.759 & 163.000 \\
+9--4 & solved & 0.8388 & 9 & 9.567 & -38.782 & 163.000 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The largest voltage changes from the base case occur at bus 9 for outage
+9--4, where $|V|$ falls by $0.1569~\pu$, and at bus 5 for outage 4--5,
+where $|V|$ falls by $0.0708~\pu$. The 3--6 and 8--2 partial-island cases
+remain close to the base voltage profile because the transmission loop and
+all loads remain connected to the original slack bus.
+
+\section{Islanding and Voltage Violations}
+
+The generator-connection outages are summarized in Table~\ref{tab:islands}.
+
+\begin{table}[htbp]
+\centering
+\caption{Generator-connection outage treatment.}
+\label{tab:islands}
+\begin{tabular}{@{}lll@{}}
+\toprule
+Outage & Status & Treatment \\
+\midrule
+1--4 & slack islanded & Not solved; load component has no slack bus \\
+3--6 & partial island & Bus 3 removed; 85 MW absorbed by slack \\
+8--2 & partial island & Bus 2 removed; 163 MW absorbed by slack \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Voltage-limit violations are low-voltage violations only:
+
+\begin{table}[htbp]
+\centering
+\caption{Post-contingency voltage violations for the 0.95--1.05 p.u. band.}
+\label{tab:violations}
+\begin{tabular}{@{}lrr@{}}
+\toprule
+Outage & Bus & $|V|$ p.u. \\
+\midrule
+4--5 & 5 & 0.9418 \\
+8--9 & 9 & 0.9380 \\
+9--4 & 9 & 0.8388 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+No solved generator reactive output exceeds the configured diagnostic
+threshold of $2.0~\pu$ on the system base. This is only a soft diagnostic:
+the fixture has no $Q_{\min}$ or $Q_{\max}$ limits, so no reactive-limit
+compliance claim is made.
+
+\section{Verification}
+
+The implementation checks the base case against the existing MATPOWER
+fixture and checks the six connected transmission-loop outages against the
+static MATPOWER fixture in \path{data/case9_n1_solutions.json}. For each
+solved or partial-island case, active and reactive balance are checked on
+the surviving component:
+\[
+  \sum_i (P_{G,i} - P_{D,i}) = \sum_{\ell} P_{\ell,\mathrm{loss}},
+  \qquad
+  \sum_i (Q_{G,i} - Q_{D,i}) =
+  \sum_{\ell} (Q_{\ell,\mathrm{from}} + Q_{\ell,\mathrm{to}}).
+\]
+The JSON output is deterministic by default and omits timestamps unless the
+script is called with \texttt{--timestamp}.
+
+\end{document}

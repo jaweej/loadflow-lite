@@ -40,7 +40,7 @@ The viz then fetches `../data/case9.json` and `layouts/case9.layout.json` (relat
 - **D3.js v7** via CDN — SVG, scales, zoom.
 - Plain HTML/CSS/JS, no build step, no framework, no CSS framework, no bundler.
 
-If you want anything else, ask first.
+The CDN dependency means browser testing needs internet access. If that is unavailable, ask before vendoring D3 under `viz/`; don't add another dependency or build step.
 
 ## Look and feel
 
@@ -124,7 +124,77 @@ In all three IEEE cases each generator is on a unique bus; you can index `genera
 }
 ```
 
-Hand-curate from the conventional published one-line diagrams (Anderson layout for 9-bus; standard textbook layouts for 14 and 30). Coordinates in a 0–1000 range; the SVG `viewBox` is fixed at `0 0 1000 1000`. Approximations are fine. Provide a coordinate for every bus in the case — no fallback rendering.
+Coordinates are in a 0–1000 range; the SVG `viewBox` is fixed at `0 0 1000 1000`. Approximations are fine, but provide a coordinate for every bus in the case — no fallback rendering.
+
+Use these hand-curated starter coordinates unless you have a clearly better one-line layout derived from the case topology. They are intentionally approximate and topology-oriented, not copied from a publication.
+
+**case9**
+
+| Bus | x | y |
+| --- | ---: | ---: |
+| 1 | 500 | 120 |
+| 2 | 120 | 780 |
+| 3 | 880 | 780 |
+| 4 | 500 | 300 |
+| 5 | 260 | 430 |
+| 6 | 260 | 640 |
+| 7 | 500 | 760 |
+| 8 | 740 | 640 |
+| 9 | 740 | 430 |
+
+**case14**
+
+| Bus | x | y |
+| --- | ---: | ---: |
+| 1 | 120 | 170 |
+| 2 | 290 | 180 |
+| 3 | 480 | 260 |
+| 4 | 330 | 360 |
+| 5 | 150 | 360 |
+| 6 | 610 | 520 |
+| 7 | 470 | 470 |
+| 8 | 470 | 650 |
+| 9 | 610 | 700 |
+| 10 | 740 | 760 |
+| 11 | 730 | 560 |
+| 12 | 860 | 480 |
+| 13 | 880 | 650 |
+| 14 | 760 | 900 |
+
+**case30**
+
+| Bus | x | y |
+| --- | ---: | ---: |
+| 1 | 90 | 120 |
+| 2 | 210 | 140 |
+| 3 | 330 | 150 |
+| 4 | 450 | 200 |
+| 5 | 200 | 310 |
+| 6 | 470 | 350 |
+| 7 | 330 | 330 |
+| 8 | 610 | 320 |
+| 9 | 550 | 500 |
+| 10 | 690 | 560 |
+| 11 | 550 | 690 |
+| 12 | 360 | 560 |
+| 13 | 240 | 650 |
+| 14 | 350 | 720 |
+| 15 | 500 | 740 |
+| 16 | 630 | 720 |
+| 17 | 780 | 690 |
+| 18 | 850 | 820 |
+| 19 | 700 | 860 |
+| 20 | 560 | 880 |
+| 21 | 760 | 470 |
+| 22 | 870 | 510 |
+| 23 | 660 | 900 |
+| 24 | 830 | 900 |
+| 25 | 900 | 690 |
+| 26 | 940 | 820 |
+| 27 | 910 | 360 |
+| 28 | 640 | 430 |
+| 29 | 930 | 230 |
+| 30 | 820 | 160 |
 
 ## Functional scope
 
@@ -151,7 +221,7 @@ Diagram ~70% width, inspector ~30%. Designed for ≥1280px wide; no responsive b
 
 ### Network diagram
 
-- **Pan and zoom** via `d3.zoom()` (wheel zooms, drag-on-empty pans). D3's default double-click behavior resets the view; that's enough — no separate reset button needed.
+- **Pan and zoom** via `d3.zoom()` (wheel zooms, drag-on-empty pans). Add a compact "Reset view" control that returns to `d3.zoomIdentity`; don't rely on D3's double-click behavior, because the default double-click action zooms rather than resets.
 - **Static layout** from the sidecar file. No drag-to-reposition, no force simulation.
 - **Bus rendering**:
   - Slack: double-circle.
@@ -161,15 +231,15 @@ Diagram ~70% width, inspector ~30%. Designed for ≥1280px wide; no responsive b
   - Non-zero `g_shunt` or `b_shunt`: small shunt marker.
   - Label: bus ID; add `v_magnitude` (p.u., 3 decimals) when solution loaded.
 - **Branch rendering**: straight lines. Transformers (`tap_ratio ≠ 1.0` or `phase_shift ≠ 0`) get a small mid-line marker.
-- **Flow overlay** (when solution loaded, toggleable): arrowhead on each branch in the direction of real-power flow, with line thickness scaled to `|p_from|`. Pick any reasonable scaling that keeps the lightest flows visible and the heaviest from dominating.
+- **Flow overlay** (when solution loaded, toggleable): arrowhead on each branch in the direction of real-power flow. If `p_from >= 0`, draw the arrow from `from_bus` to `to_bus`; if `p_from < 0`, draw it from `to_bus` to `from_bus`. Scale line thickness by `abs(p_from)`. Pick any reasonable scaling that keeps the lightest flows visible and the heaviest from dominating.
 - **Voltage heatmap** (when solution loaded, toggleable): bus fill color from a colorblind-safe diverging scale (e.g. D3's `interpolatePuOr` or `interpolateBrBG`) clamped at 0.94/1.06 p.u., centered at 1.0. The IEEE cases stay close to 1.0 in normal operation, so expect subtle coloring — not a bug.
 
 ### Inspector panel
 
 Two-column key/value layout, monospace numbers, units labeled. All powers in MW / MVAr (multiply p.u. by `base_mva`).
 
-- **Empty selection** (default, or click background): case-level summary — total `p_gen`, total `p_load`, total real losses (when solved), bus counts by type, branch count.
-- **Bus selected**: bus ID, type; case-side `p_load`, `q_load`, `p_gen`, `q_gen`, `v_magnitude` (PV/slack), `g_shunt`/`b_shunt` (when non-zero); when solution is loaded: solved `v_magnitude`, `v_angle_degrees`, generator output from the `generators` array, and a list of incident branches with their `p_from` / `q_from`.
+- **Empty selection** (default, or click background): case-level summary — total load from case-side `p_load`, bus counts by type, branch count. When solved, show total generation from `solution.generators`, total real losses, and label the generation as "solved generation"; when topology-only, show total case-side `p_gen` and label it as "scheduled generation".
+- **Bus selected**: bus ID, type; case-side `p_load`, `q_load`, `p_gen`, `q_gen`, `v_magnitude` (PV/slack), `g_shunt`/`b_shunt` (when non-zero); when solution is loaded: solved `v_magnitude`, `v_angle_degrees`, generator output from the `generators` array, and a list of incident branches showing flow at the selected bus. Use `p_from` / `q_from` when the selected bus is `from_bus`; use `p_to` / `q_to` when the selected bus is `to_bus`.
 - **Branch selected**: endpoints, `r`, `x`, `b`, `tap_ratio`, `phase_shift`; when solution is loaded: `p_from`, `q_from`, `p_to`, `q_to`, derived `p_loss`, `q_loss`.
 
 ### Footer
@@ -188,7 +258,7 @@ Vertical slices, each one demoable. Don't build all the layout machinery before 
 
 ## Working style
 
-- **Show me each slice working** before moving on — a one-line note is fine.
+- **Record each slice working** before moving on — a one-line note is fine. Don't stop after a slice unless something is blocked or ambiguous.
 - **Pick the simplest thing that works.** If you find yourself reaching for a sophisticated SVG technique, ask whether something plainer would be just as readable.
 - **Don't invent data.** If a field isn't in the fixtures, leave the row out. The data-contract section above lists exactly what is and isn't there.
 - **Don't modify `data/`.** All viz authoring (layouts, display labels) goes under `viz/`.

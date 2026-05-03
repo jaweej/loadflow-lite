@@ -45,7 +45,42 @@ The implementation must reproduce solved MATPOWER reference outputs for the IEEE
 
 Input case data must be transcribed from MATPOWER's published case files (`case9.m`, `case14.m`, `case30.m`) into your own Python or JSON format, with a citation to the MATPOWER source file and version. Use those exact cases. MATPOWER also provides `case_ieee30.m`; do not substitute it for `case30.m` unless this prompt is explicitly changed. `case30` is based on the IEEE 30-bus case but is not identical to `case_ieee30`. Do not depend on a MATPOWER parser library, and do not read `.m` case files at test time.
 
-Do not assume official static JSON solution fixtures already exist online. Reference solution fixtures must be generated once by running MATPOWER `runpf` with a named MATPOWER version outside this project and committed as static JSON. Each solution fixture must include bus voltage magnitudes and angles, generator real and reactive outputs, and branch `PF`, `QF`, `PT`, and `QT` values. Each fixture must also include a `metadata` object recording the MATPOWER version, command/options used, base MVA, date generated, and any unit/sign conversions applied. JSON has no comments, so do not rely on comment syntax for provenance. The fixtures must not be computed during tests.
+Do not assume official static JSON solution fixtures already exist online. Reference solution fixtures must be generated once by running MATPOWER `runpf` with a named MATPOWER version under GNU Octave and committed as static JSON.
+
+For this repo's default environment, assume Linux/WSL with `apt-get`. If GNU Octave is not already available, install it as a system tool so `octave` is available on `PATH`, normally at `/usr/bin/octave`:
+
+```bash
+sudo apt-get update
+sudo apt-get install -y octave
+```
+
+Install/download MATPOWER outside the Python package in a repo-local ignored tooling directory:
+
+```bash
+mkdir -p .external
+# Add ".external/" to .gitignore before downloading MATPOWER.
+# Then download or clone a named MATPOWER release into .external/matpower/.
+```
+
+Prefer a tagged MATPOWER release over an unpinned moving branch. Record the exact MATPOWER version or commit, the source URL, and the Octave version in `data/README.md`. It is part of this task to solve any Octave/MATPOWER setup issues that arise. The Python project itself must not gain a runtime or test dependency on Octave, MATPOWER, PYPOWER, pandapower, or any other power-system package.
+
+Each solution fixture must include bus voltage magnitudes and angles, generator real and reactive outputs, and branch `PF`, `QF`, `PT`, and `QT` values. Each fixture must also include a `metadata` object recording the MATPOWER version, Octave version, command/options used, base MVA, date generated, and any unit/sign conversions applied. JSON has no comments, so do not rely on comment syntax for provenance. The fixtures must not be computed during tests.
+
+### Execution model — minimize permission interruptions
+
+Separate the work into two phases.
+
+**Phase 1: permission/setup phase.** Before starting the solver implementation, do all approval-gated setup and verification:
+
+1. Check whether `octave`, `git`, Python, and the project `.venv` are available.
+2. Install GNU Octave via `apt-get` if needed.
+3. Add `.external/` to `.gitignore`, create `.external/`, and download/clone a pinned MATPOWER release into `.external/matpower/`.
+4. Use the project `.venv` for Python dependencies; install only `numpy` and `pytest` there if they are missing.
+5. Verify `octave --version`, MATPOWER version/commit, and a smoke `runpf('case9')` before beginning the Python implementation.
+
+Batch the expected permission requests in this phase as much as the environment allows. Network access, `sudo`, `apt-get`, package installation, and external downloads belong here, not in the implementation phase.
+
+**Phase 2: autonomous build phase.** After setup succeeds, continue without asking for permissions unless something genuinely impossible appears. This phase should use only local repo writes, the already-installed `.venv`, the already-installed Octave/MATPOWER tooling, and normal test commands. Do not introduce new system packages, Python packages, external services, Docker images, or network downloads during this phase. Prefer Python standard-library scripts over new command-line utilities such as `jq`. If optional tooling is missing, work around it with existing Python/Octave capabilities instead of asking to install more software. If an unexpected permission need arises, pause and explain exactly why it is necessary.
 
 ## Scope — what to build
 

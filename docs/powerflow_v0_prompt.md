@@ -30,7 +30,7 @@ Every piece of functionality must be developed in the red/green/refactor cycle:
 2. **Green**: Write the *minimum* code that makes the test pass. Resist the urge to generalize ahead of need.
 3. **Refactor**: Clean up only with the test as a safety net.
 
-Commit (or at least mark in the development log) at every green. Do not write a function before its test exists. Do not write code "you'll need later" — wait for the test that requires it.
+After each green, briefly state what passed and what changed. Commit at natural milestones. Do not write a function before its test exists. Do not write code "you'll need later" — wait for the test that requires it.
 
 When a test fails, **read the failure message carefully before changing code**. If you don't understand why it failed, write a smaller test that isolates the question, don't guess.
 
@@ -56,9 +56,9 @@ A Newton-Raphson AC power flow with:
 1. **Y-bus assembly** from a line/transformer list. Lines have `(from_bus, to_bus, r, x, b, tap_ratio, phase_shift)`. Phase shifters can be 0 for v0 but the data structure must accommodate them. Shunt admittances at buses are a separate input.
 2. **Bus type handling**: slack (V, θ fixed), PV (P, V fixed), PQ (P, Q fixed). Exactly one slack bus.
 3. **Power mismatch** computation: `ΔP_i = P_i,specified − P_i,calculated`, similarly for Q at PQ buses only. Use positive loads and positive generations in the input data, and compute net specified injection as `P_spec = p_gen - p_load` and `Q_spec = q_gen - q_load` where a fixed-Q injection is required.
-4. **Jacobian** assembled analytically from the four submatrices of calculated power injections: `∂P_calc/∂θ`, `∂P_calc/∂V`, `∂Q_calc/∂θ`, `∂Q_calc/∂V`. Do **not** use numerical differentiation. Derive the expressions and write them in code with a comment pointing to the textbook formula.
+4. **Jacobian** assembled analytically from the four submatrices of calculated power injections: `∂P_calc/∂θ`, `∂P_calc/∂V`, `∂Q_calc/∂θ`, `∂Q_calc/∂V`. Do **not** use numerical differentiation. Add concise comments near the implementation that name the formula and textbook reference; do not paste long derivations into the code.
 5. **Newton-Raphson iteration**: with the mismatch convention above and `J` defined as derivatives of calculated injections, solve `J Δx = Δf`, then update `x = x + Δx`. If you instead define a residual as `calculated - specified`, document that convention and solve the equivalent signed system consistently. Convergence on max mismatch < tolerance (default `1e-8` p.u.). Maximum iterations parameter (default 20). Raise a clear exception on non-convergence — do not return silently.
-6. **Post-solution**: compute line flows (P, Q at both ends), line losses, total system losses, slack bus injection. Verify Kirchhoff at every bus as a sanity check inside the solver.
+6. **Post-solution**: compute line flows (P, Q at both ends), line losses, total system losses, slack bus injection. Provide a focused post-solution Kirchhoff balance helper or assertion with a clear tolerance.
 
 ### Data layer
 
@@ -87,7 +87,7 @@ class Branch:
     b: float           # total line charging
     tap_ratio: float = 1.0
     phase_shift: float = 0.0  # radians internally; MATPOWER degrees must be converted
-    status: int = 1     # 1 in-service, 0 out-of-service
+    status: int = 1     # v0 expects 1; raise on out-of-service branches
 
 @dataclass
 class Case:
@@ -99,6 +99,8 @@ class Case:
 All internal solver quantities should be in per unit except voltage angles and branch phase shifts, which may be stored in radians internally. JSON reference fixtures should report voltage angles in degrees to match MATPOWER output. When transcribing MATPOWER data, convert bus loads/generators/shunts from MW/MVAr to p.u. on `baseMVA`; branch `r`, `x`, and `b` are already p.u. on the system base; branch phase shifts are in degrees in MATPOWER and must be converted to radians internally.
 
 Slack bus active and reactive generation and PV bus reactive generation are solved outputs, not fixed mismatch inputs. PQ buses use fixed net active and reactive injections.
+
+For v0, all transcribed branch data is expected to be in service. If a branch has `status != 1`, raise a clear validation error rather than implementing out-of-service branch handling.
 
 ### Cases to support
 
@@ -127,7 +129,7 @@ This is a sketch, not a script. Follow the spirit (smallest meaningful test firs
 2. **Y-bus with line charging susceptance**. Hand-compute, assert.
 3. **Y-bus with off-nominal tap ratio**. Use the standard π-equivalent transformer model. Hand-compute, assert.
 4. **Y-bus with bus shunts**. Assert added to diagonal.
-5. **Y-bus on IEEE 9-bus**. Compare to MATPOWER's Y-bus (you can dump it once from MATPOWER and store as fixture).
+5. **Optional Y-bus on IEEE 9-bus**. If the hand-computed toy tests are not enough to diagnose Y-bus issues, compare to MATPOWER's Y-bus dumped once as a fixture.
 6. **Power injection calculation** at a bus given V, θ, Y. Hand-compute on 2-bus, assert.
 7. **Single Newton-Raphson step on a 2-bus PQ-slack system** with hand-computed Jacobian.
 8. **Full solve on 2-bus system** — converges, gives correct answer.
@@ -172,7 +174,7 @@ powerflow/
 ## Working style — what I want from you
 
 - **Work in small steps and show your work.** After each red/green cycle, briefly state what you tested, what you wrote, and what's next. Don't dump 500 lines of code at once.
-- **When you derive a Jacobian expression, show the derivation in a comment** with a textbook reference (e.g. Bergen & Vittal, Glover, or Grainger & Stevenson). I want to be able to read the code and recognize the equations.
+- **When you implement a Jacobian expression, add a concise formula/reference comment** (e.g. Bergen & Vittal, Glover, or Grainger & Stevenson). I want to be able to read the code and recognize the equations without wading through textbook prose.
 - **If a test fails in a way you don't immediately understand, stop and diagnose**, don't try random fixes. Print intermediate values, write a smaller test, reason about the physics. This is the most important rule.
 - **Be honest about what's not working.** If 9-bus passes but 14-bus is off by `2e-3` on one voltage angle, say so explicitly. Don't quietly loosen the tolerance.
 - **No silent fallbacks.** If Newton-Raphson doesn't converge, raise. If the case has no slack bus, raise. If a branch references a nonexistent bus, raise. Fail loudly with informative messages.

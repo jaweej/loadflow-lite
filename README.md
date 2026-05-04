@@ -11,6 +11,7 @@ Minimal AC Newton-Raphson power flow solver in Python. The implementation is int
 - IEEE 9-bus AC N-1 branch-outage analysis is implemented with deterministic JSON output.
 - Toy/system tests pass.
 - IEEE MATPOWER fixture tests validate `case9`, `case14`, `case30`, and the supplemental `soln9_pf` 9-bus fixture.
+- etc.
 
 ## Setup
 

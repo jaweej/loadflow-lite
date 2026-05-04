@@ -148,7 +148,7 @@ def solve_power_flow(
         raise ValueError("max_iterations must be positive")
 
     ybus = build_ybus(case)
-    _slack_buses, pv_buses, pq_buses = _bus_type_indices(case)
+    _, pv_buses, pq_buses = _bus_type_indices(case)
     angle_buses = np.concatenate([pv_buses, pq_buses])
     v_magnitude, v_angle = _initial_voltage(case)
 
